@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.scholara.app",
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E9F4F1"
       },

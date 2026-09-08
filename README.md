@@ -1,14 +1,15 @@
 # Scholara
 
-Scholara is a mobile academic network for early-career researchers. This Phase 1 prototype includes:
+Scholara is a mobile academic network for early-career researchers. The current Phase 2 build includes:
 
-- Welcome and local demo sign-in flows
+- Supabase email/password registration, sign-in, reset, session persistence, and sign-out
 - Eight-step academic onboarding
+- Authenticated profile persistence protected by Row Level Security
 - Research and Moving discovery modes
 - Mock research recommendations and transparent match reasons
 - Community, Matches, Messages, and Profile tabs
 - Persisted local prototype state
-- An optional, environment-driven Supabase client foundation
+- Responsive layouts tested down to a 320×568 viewport
 
 ## Run locally
 
@@ -21,11 +22,11 @@ pnpm start
 
 Then open the app in Expo Go, an Android/iOS simulator, or the web preview.
 
-## Supabase setup (next phase)
+## Supabase setup
 
-Copy `.env.example` to `.env` and add the public project URL and anonymous key. Never put a service-role key or an AI provider secret in the mobile app.
+Copy `.env.example` to `.env.local` and add the public project URL and publishable/anonymous key. Never put a service-role key or an AI provider secret in the mobile app.
 
-The current UI intentionally stays usable without Supabase. Authentication, migrations, Row Level Security, matching persistence, Realtime chat, and moderation endpoints are later controlled phases.
+Apply `supabase/migrations/202609080001_phase2_profiles.sql` in the Supabase SQL Editor before testing registration. It creates the profile table, validation constraints, account trigger, explicit grants, and owner-only write policies. Matching persistence, Realtime chat, and moderation endpoints remain later controlled phases.
 
 ## Useful checks
 

@@ -6,7 +6,11 @@ import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
 
 export default function ProfileScreen() {
-  const { profile, onboardingComplete } = useApp();
+  const { profile, onboardingComplete, session, signOut } = useApp();
+  const logOut = async () => {
+    const error = await signOut();
+    if (!error) router.replace('/');
+  };
   return <Screen>
     <View style={styles.hero}><View style={styles.avatar}><Text style={styles.initials}>{profile.fullName.split(' ').map((word) => word[0]).join('')}</Text></View><Text style={styles.name}>{profile.fullName}</Text><Text style={styles.handle}>@{profile.username}</Text><Text style={styles.meta}>{profile.academicStage || 'Academic stage not added'} · {profile.university || 'University not added'}</Text></View>
     {!onboardingComplete && <Card style={styles.notice}><Ionicons name="information-circle-outline" size={22} color={colors.primary} /><Text style={styles.noticeText}>This demo profile is incomplete. Finish onboarding to personalize Discover.</Text></Card>}
@@ -14,6 +18,7 @@ export default function ProfileScreen() {
     <Card style={styles.section}><Text style={styles.label}>ACADEMIC LOCATION</Text><Info icon="location-outline" text={profile.currentCity ? `${profile.currentCity}, ${profile.currentCountry}` : 'Current location not added'} />{profile.isRelocating && <Info icon="airplane-outline" text={`Moving to ${profile.destinationCity}, ${profile.destinationCountry} · ${profile.relocationDate}`} />}</Card>
     <Card style={styles.section}><Text style={styles.label}>TRUST & SAFETY</Text><Info icon="shield-checkmark-outline" text="Profile reporting and blocking architecture reserved for Phase 3." /><Info icon="finger-print-outline" text="University email and ORCID verification prepared for V1.5." /></Card>
     <Button label="Edit onboarding profile" variant="secondary" onPress={() => router.push('/onboarding')} />
+    {session ? <Button label="Sign out" variant="ghost" onPress={() => void logOut()} /> : null}
   </Screen>;
 }
 

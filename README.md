@@ -8,7 +8,8 @@ Scholara is a mobile academic network for early-career researchers. The current 
 - Research and Moving discovery modes backed by completed Supabase profiles
 - Deterministic research and relocation scoring with transparent match reasons
 - Community, Matches, Messages, and Profile tabs
-- Persisted local save and connection-request prototype state
+- Server-persisted saves, mutual connection requests, and matches
+- Private Realtime messaging available only to mutual matches
 - Responsive layouts tested down to a 320×568 viewport
 
 ## Run locally
@@ -26,12 +27,13 @@ Then open the app in Expo Go, an Android/iOS simulator, or the web preview.
 
 Copy `.env.example` to `.env.local` and add the public project URL and publishable/anonymous key. Never put a service-role key or an AI provider secret in the mobile app.
 
-Apply `supabase/migrations/202609080001_phase2_profiles.sql` in the Supabase SQL Editor before testing registration. It creates the profile table, validation constraints, account trigger, explicit grants, and owner-only write policies. Discover reads only completed profiles allowed by those policies and excludes the current user. Server-persisted mutual matching, Realtime chat, and moderation endpoints remain later controlled phases.
+Apply the SQL files in `supabase/migrations` in filename order. They create profiles, private saved profiles, mutual matching, bounded profile data, and private messages with explicit Row Level Security. Realtime chat is limited to matched participants. Moderation endpoints remain a later controlled phase.
 
 ## Useful checks
 
 ```bash
 pnpm typecheck
 pnpm lint
+pnpm test
 pnpm exec expo export --platform web
 ```

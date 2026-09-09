@@ -1,14 +1,15 @@
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { BrandMark, Button, MessageBanner, Screen, SectionTitle } from '@/components/ui';
-import { getSessionTokensFromUrl } from '@/services/auth';
+import { getAuthCodeFromUrl } from '@/services/auth';
 import { supabase } from '@/services/supabase';
 import { colors, spacing } from '@/theme/tokens';
 
 export default function AuthCallbackScreen() {
   const [error, setError] = useState('');
+  const processedUrls = useRef(new Set<string>());
 
   useEffect(() => {
     let active = true;
@@ -19,21 +20,16 @@ export default function AuthCallbackScreen() {
         setError('Doğrulama bağlantısı açılamadı. Giriş ekranından devam edebilirsin.');
         return;
       }
+      if (processedUrls.current.has(url)) return;
+      processedUrls.current.add(url);
 
-      const tokens = getSessionTokensFromUrl(url);
-      if (tokens.error) {
-        setError(tokens.error);
-        return;
-      }
-      if (!tokens.accessToken || !tokens.refreshToken) {
-        setError('E-posta doğrulandı. Devam etmek için giriş yap.');
+      const callback = getAuthCodeFromUrl(url);
+      if (callback.error || !callback.code) {
+        setError(callback.error ?? 'Doğrulama kodu bulunamadı.');
         return;
       }
 
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-      });
+      const { error: sessionError } = await supabase.auth.exchangeCodeForSession(callback.code);
       if (!active) return;
       if (sessionError) {
         setError(sessionError.message);

@@ -1,7 +1,7 @@
 import type { Profile } from '@/types/domain';
 import { supabase } from '@/services/supabase';
 
-type ProfileRow = {
+export type ProfileRow = {
   full_name: string;
   username: string;
   academic_stage: Profile['academicStage'];
@@ -43,24 +43,32 @@ export function rowToProfile(row: ProfileRow): Profile {
 }
 
 export function profileToRow(profile: Profile, userId: string) {
+  const boundedList = (items: string[], maxItems: number, maxLength: number) => items
+    .map((item) => item.trim().slice(0, maxLength))
+    .filter(Boolean)
+    .slice(0, maxItems);
+
   return {
     id: userId,
     full_name: profile.fullName.trim().slice(0, 100),
     username: profile.username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30),
     academic_stage: profile.academicStage,
-    university: profile.university.trim(),
-    department: profile.department.trim(),
-    program: profile.program.trim(),
+    university: profile.university.trim().slice(0, 160),
+    department: profile.department.trim().slice(0, 120),
+    program: profile.program.trim().slice(0, 160),
     research_description: profile.researchDescription.trim().slice(0, 3000),
-    research_interests: profile.researchInterests,
-    intents: profile.intents,
-    current_city: profile.currentCity.trim(),
-    current_country: profile.currentCountry.trim(),
+    research_interests: boundedList(profile.researchInterests, 20, 60),
+    intents: boundedList(profile.intents, 10, 80),
+    current_city: profile.currentCity.trim().slice(0, 100),
+    current_country: profile.currentCountry.trim().slice(0, 100),
     is_relocating: profile.isRelocating,
-    destination_city: profile.isRelocating ? profile.destinationCity.trim() : '',
-    destination_country: profile.isRelocating ? profile.destinationCountry.trim() : '',
-    relocation_date: profile.isRelocating ? profile.relocationDate.trim() : '',
-    languages: profile.languages,
+    destination_city: profile.isRelocating ? profile.destinationCity.trim().slice(0, 100) : '',
+    destination_country: profile.isRelocating ? profile.destinationCountry.trim().slice(0, 100) : '',
+    relocation_date: profile.isRelocating ? profile.relocationDate.trim().slice(0, 30) : '',
+    languages: profile.languages.slice(0, 10).map((language) => ({
+      name: language.name.trim().slice(0, 50),
+      proficiency: language.proficiency.trim().slice(0, 30),
+    })).filter((language) => language.name && language.proficiency),
     onboarding_completed: true,
   };
 }

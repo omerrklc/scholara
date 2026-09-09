@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BrandMark, Button, Card, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { getAuthRedirectUrl } from '@/services/auth';
+import { publicAuthError } from '@/services/authErrors';
 import { supabase } from '@/services/supabase';
 import { colors, spacing } from '@/theme/tokens';
 
@@ -14,9 +15,16 @@ export default function VerifyEmailScreen() {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const resend = async () => {
-    if (!supabase || !email || sending) return;
+    if (!supabase || !email || sending || cooldown > 0) return;
     setSending(true);
     setMessage('');
     const { error } = await supabase.auth.resend({
@@ -26,7 +34,8 @@ export default function VerifyEmailScreen() {
     });
     setSending(false);
     setIsError(Boolean(error));
-    setMessage(error?.message ?? 'Yeni doğrulama e-postası gönderildi.');
+    setMessage(error ? publicAuthError(error, 'resend') : 'Yeni doğrulama e-postası gönderildi.');
+    if (!error) setCooldown(60);
   };
 
   return <Screen style={styles.container}>
@@ -41,7 +50,7 @@ export default function VerifyEmailScreen() {
     <View style={styles.actions}>
       <Button label="E-posta uygulamasını aç" onPress={() => void Linking.openURL('mailto:')} />
       <Button label="E-postayı onayladım, devam et" variant="secondary" onPress={() => router.replace({ pathname: '/sign-in', params: { email } })} />
-      <Button label={sending ? 'Gönderiliyor…' : 'E-postayı yeniden gönder'} variant="ghost" disabled={sending || !email} onPress={() => void resend()} />
+      <Button label={sending ? 'Gönderiliyor…' : cooldown > 0 ? `Tekrar gönder (${cooldown}s)` : 'E-postayı yeniden gönder'} variant="ghost" disabled={sending || !email || cooldown > 0} onPress={() => void resend()} />
     </View>
   </Screen>;
 }

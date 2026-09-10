@@ -2,11 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ResearcherCard } from '@/components/ResearcherCard';
+import { SafetySheet } from '@/components/SafetySheet';
 import { BrandMark, Button, Card, MessageBanner, Screen, SectionTitle, SegmentedControl } from '@/components/ui';
 import { fetchDiscoveryProfiles, rankResearchers } from '@/services/discovery';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
-import type { DiscoveryMode, Profile } from '@/types/domain';
+import type { DiscoveryMode, Profile, Researcher } from '@/types/domain';
 
 type DiscoveryProfile = Profile & { id: string };
 
@@ -21,6 +22,7 @@ export default function DiscoverScreen() {
   const [actionError, setActionError] = useState('');
   const [savingId, setSavingId] = useState('');
   const [connectingId, setConnectingId] = useState('');
+  const [safetyTarget, setSafetyTarget] = useState<Researcher | null>(null);
 
   const loadProfiles = useCallback(async () => {
     if (!session) return;
@@ -82,9 +84,14 @@ export default function DiscoverScreen() {
     {actionMessage ? <MessageBanner message={actionMessage} tone="success" /> : null}
     {loading ? <Card style={styles.state}><ActivityIndicator color={colors.primary} size="large" /><Text style={styles.stateTitle}>Finding relevant researchers…</Text><Text style={styles.stateText}>Comparing academic interests and relocation context.</Text></Card> : null}
     {!loading && error ? <><MessageBanner message="Discover profiles could not be loaded. Please check your connection and try again." /><Button label="Try again" variant="secondary" onPress={() => void loadProfiles()} /></> : null}
-    {!loading && !error && person ? <ResearcherCard person={person} saved={saved.includes(person.id)} connectionState={connectionStates[person.id]} saving={savingId === person.id} connecting={connectingId === person.id} onPass={next} onSave={() => void savePerson()} onConnect={() => void connectPerson()} /> : null}
+    {!loading && !error && person ? <ResearcherCard person={person} saved={saved.includes(person.id)} connectionState={connectionStates[person.id]} saving={savingId === person.id} connecting={connectingId === person.id} onPass={next} onSave={() => void savePerson()} onConnect={() => void connectPerson()} onSafety={() => setSafetyTarget(person)} /> : null}
     {!loading && !error && !person ? <Card style={styles.state}><Ionicons name={mode === 'moving' ? 'airplane-outline' : 'people-outline'} size={44} color={colors.primary} /><Text style={styles.stateTitle}>{profiles.length === 0 ? 'You are early to Scholara' : mode === 'moving' ? 'No relocation matches yet' : 'You reviewed everyone for now'}</Text><Text style={styles.stateText}>{profiles.length === 0 ? 'New researchers will appear here after they complete their academic profiles.' : mode === 'moving' ? 'Try again as more researchers add their destination details.' : 'Refresh to check for new completed profiles.'}</Text><Button label={passed.length ? 'Review again' : 'Refresh profiles'} variant="secondary" onPress={passed.length ? () => setPassed([]) : () => void loadProfiles()} /></Card> : null}
     {!loading && !error ? <Text style={styles.note}>Recommendations use completed Scholara profiles and transparent, deterministic matching signals.</Text> : null}
+    {safetyTarget ? <SafetySheet targetId={safetyTarget.id} targetName={safetyTarget.name} source="discover" onClose={() => setSafetyTarget(null)} onBlocked={() => {
+      setProfiles((current) => current.filter((item) => item.id !== safetyTarget.id));
+      setPassed((current) => current.filter((id) => id !== safetyTarget.id));
+      void loadProfiles();
+    }} /> : null}
   </Screen>;
 }
 

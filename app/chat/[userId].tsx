@@ -3,6 +3,7 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, Card, MessageBanner, Screen } from '@/components/ui';
+import { SafetySheet } from '@/components/SafetySheet';
 import { fetchConversation, fetchConversationSummaries, markConversationRead, sendChatMessage, subscribeToConversation, type ChatMessage } from '@/services/messaging';
 import { useApp } from '@/state/AppProvider';
 import { colors, radius, spacing } from '@/theme/tokens';
@@ -20,6 +21,7 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [showSafety, setShowSafety] = useState(false);
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
   const loadMessages = useCallback(async (showLoading = false) => {
@@ -73,7 +75,7 @@ export default function ChatScreen() {
     <View style={styles.header}>
       <Pressable accessibilityLabel="Back to messages" accessibilityRole="button" onPress={() => router.back()} style={styles.back}><Ionicons name="arrow-back" size={22} color={colors.ink} /></Pressable>
       <View style={styles.headerText}><Text numberOfLines={1} style={styles.name}>{partnerName}</Text><Text style={styles.subtitle}>Mutual academic match</Text></View>
-      <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
+      <Pressable accessibilityLabel={`Safety options for ${partnerName}`} accessibilityRole="button" onPress={() => setShowSafety(true)} style={styles.safety}><Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} /></Pressable>
     </View>
     {error ? <MessageBanner message={error} /> : null}
     {loading ? <Card style={styles.loading}><ActivityIndicator color={colors.primary} /><Text style={styles.emptyText}>Loading messages…</Text></Card> : <FlatList
@@ -95,7 +97,8 @@ export default function ChatScreen() {
       <View style={styles.send}><Button label={sending ? '…' : 'Send'} disabled={!draft.trim() || sending} onPress={() => void send()} /></View>
     </View>
     <Text style={styles.counter}>{draft.length}/2000</Text>
+    {showSafety ? <SafetySheet targetId={otherUserId} targetName={partnerName} source="chat" onClose={() => setShowSafety(false)} onBlocked={() => router.replace('/(tabs)/messages')} /> : null}
   </Screen>;
 }
 
-const styles = StyleSheet.create({ screen: { paddingBottom: spacing.sm }, header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerText: { flex: 1, minWidth: 0 }, name: { color: colors.ink, fontSize: 17, fontWeight: '800' }, subtitle: { color: colors.inkMuted, fontSize: 11 }, loading: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, listView: { flex: 1 }, list: { flexGrow: 1, paddingVertical: spacing.sm, gap: spacing.xs }, emptyList: { justifyContent: 'center' }, bubbleWrap: { width: '100%', flexDirection: 'row' }, mineWrap: { justifyContent: 'flex-end' }, theirsWrap: { justifyContent: 'flex-start' }, bubble: { maxWidth: '82%', borderRadius: radius.md, paddingHorizontal: 13, paddingVertical: 9, gap: 4 }, mine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 }, theirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 4 }, body: { color: colors.ink, fontSize: 15, lineHeight: 21 }, mineBody: { color: colors.white }, time: { color: colors.inkMuted, fontSize: 9, alignSelf: 'flex-end' }, mineTime: { color: '#CBE3DA' }, empty: { alignItems: 'center', gap: spacing.sm, padding: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center' }, composer: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, input: { flex: 1, minHeight: 52, maxHeight: 120, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 12, color: colors.ink, fontSize: 15 }, send: { width: 88 }, counter: { color: colors.inkMuted, fontSize: 10, textAlign: 'right' } });
+const styles = StyleSheet.create({ screen: { paddingBottom: spacing.sm }, header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, safety: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, headerText: { flex: 1, minWidth: 0 }, name: { color: colors.ink, fontSize: 17, fontWeight: '800' }, subtitle: { color: colors.inkMuted, fontSize: 11 }, loading: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, listView: { flex: 1 }, list: { flexGrow: 1, paddingVertical: spacing.sm, gap: spacing.xs }, emptyList: { justifyContent: 'center' }, bubbleWrap: { width: '100%', flexDirection: 'row' }, mineWrap: { justifyContent: 'flex-end' }, theirsWrap: { justifyContent: 'flex-start' }, bubble: { maxWidth: '82%', borderRadius: radius.md, paddingHorizontal: 13, paddingVertical: 9, gap: 4 }, mine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 }, theirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 4 }, body: { color: colors.ink, fontSize: 15, lineHeight: 21 }, mineBody: { color: colors.white }, time: { color: colors.inkMuted, fontSize: 9, alignSelf: 'flex-end' }, mineTime: { color: '#CBE3DA' }, empty: { alignItems: 'center', gap: spacing.sm, padding: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center' }, composer: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, input: { flex: 1, minHeight: 52, maxHeight: 120, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 12, color: colors.ink, fontSize: 15 }, send: { width: 88 }, counter: { color: colors.inkMuted, fontSize: 10, textAlign: 'right' } });

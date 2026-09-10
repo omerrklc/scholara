@@ -25,9 +25,11 @@ Then open the app in Expo Go, an Android/iOS simulator, or the web preview.
 
 ## Supabase setup
 
-Copy `.env.example` to `.env.local` and add the public project URL and publishable/anonymous key. Never put a service-role key or an AI provider secret in the mobile app.
+Copy `.env.example` to `.env.local` and add the public project URL and publishable key. Legacy projects may use the explicitly named `EXPO_PUBLIC_SUPABASE_ANON_KEY` instead. Never put a service-role key or an AI provider secret in the mobile app; the client rejects recognizable Supabase secret/service-role keys at startup.
 
-Apply the SQL files in `supabase/migrations` in filename order. They create profiles, private saved profiles, mutual matching, bounded profile data, and private messages with explicit Row Level Security. Realtime chat is limited to matched participants. Moderation endpoints remain a later controlled phase.
+Apply the SQL files in `supabase/migrations` in filename order. They create owner-protected profiles, a bounded discovery endpoint, private saved profiles, mutual matching, bounded profile data, and private messages with explicit Row Level Security. Realtime chat is limited to matched participants. Moderation endpoints remain a later controlled phase.
+
+Authentication callbacks use PKCE. Add the exact callback generated for your build (for production, `scholara://auth/callback`) to the Supabase Authentication redirect allow list. Production releases should move to verified iOS Universal Links and Android App Links before public distribution.
 
 ## Useful checks
 

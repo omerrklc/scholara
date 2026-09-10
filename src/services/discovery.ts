@@ -3,14 +3,12 @@ import { rowToProfile, type ProfileRow } from '@/services/profiles';
 import type { DiscoveryMode, Profile, Researcher } from '@/types/domain';
 
 type DiscoveryProfile = Profile & { id: string };
-type DiscoveryProfileRow = ProfileRow & { id: string };
-
-const profileColumns = [
-  'id', 'full_name', 'username', 'academic_stage', 'university', 'department', 'program',
-  'research_description', 'research_interests', 'intents', 'current_city', 'current_country',
-  'is_relocating', 'destination_city', 'destination_country', 'relocation_date', 'languages',
-  'onboarding_completed',
-].join(',');
+type DiscoveryProfileRow = Pick<ProfileRow,
+  'full_name' | 'academic_stage' | 'university' | 'department' | 'program' |
+  'research_description' | 'research_interests' | 'intents' | 'current_city' |
+  'current_country' | 'is_relocating' | 'destination_city' | 'destination_country' |
+  'relocation_date'
+> & { id: string };
 
 const avatarColors = ['#C97B63', '#5F8796', '#7C6D9B', '#486D62', '#A66C86', '#5C7C99'];
 const stopWords = new Set(['about', 'after', 'also', 'and', 'are', 'for', 'from', 'how', 'into', 'its', 'our', 'that', 'the', 'their', 'this', 'through', 'using', 'with', 'your']);
@@ -100,14 +98,19 @@ export function rankResearchers(viewer: Profile, profiles: DiscoveryProfile[], m
 
 export async function fetchDiscoveryProfiles(currentUserId: string) {
   if (!supabase) return { profiles: [] as DiscoveryProfile[], error: 'Supabase is not configured.' };
-  const { data, error } = await supabase
-    .from('profiles')
-    .select(profileColumns)
-    .eq('onboarding_completed', true)
-    .neq('id', currentUserId)
-    .limit(50);
+  const { data, error } = await supabase.rpc('discover_profiles');
 
   if (error) return { profiles: [] as DiscoveryProfile[], error: error.message };
-  const profiles = (data as unknown as DiscoveryProfileRow[]).map((row) => ({ id: row.id, ...rowToProfile(row) }));
+  const profiles = (data as unknown as DiscoveryProfileRow[])
+    .filter((row) => row.id !== currentUserId)
+    .map((row) => ({
+      id: row.id,
+      ...rowToProfile({
+        ...row,
+        username: '',
+        languages: [],
+        onboarding_completed: true,
+      }),
+    }));
   return { profiles, error: null };
 }

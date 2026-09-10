@@ -2,28 +2,30 @@ import * as Linking from 'expo-linking';
 
 export const getAuthRedirectUrl = () => Linking.createURL('auth/callback');
 
-function readParams(section: string | undefined) {
-  const values: Record<string, string> = {};
-  section?.split('&').forEach((pair) => {
-    const [rawKey, ...rawValue] = pair.split('=');
-    if (!rawKey) return;
-    values[decodeURIComponent(rawKey)] = decodeURIComponent(rawValue.join('=').replace(/\+/g, ' '));
-  });
-  return values;
+function singleParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
-export function getSessionTokensFromUrl(url: string) {
-  const query = url.split('?')[1]?.split('#')[0];
-  const fragment = url.split('#')[1];
-  const params = { ...readParams(query), ...readParams(fragment) };
+function normalizedPath(path: string | null) {
+  return (path ?? '').replace(/^\/+|\/+$/g, '');
+}
 
-  if (params.error || params.error_description) {
-    return { error: params.error_description ?? params.error, accessToken: null, refreshToken: null };
+export function getAuthCodeFromUrl(url: string) {
+  const expected = Linking.parse(getAuthRedirectUrl());
+  const actual = Linking.parse(url);
+  const validCallback = actual.scheme === expected.scheme
+    && actual.hostname === expected.hostname
+    && normalizedPath(actual.path) === normalizedPath(expected.path);
+
+  if (!validCallback) {
+    return { code: null, error: 'Invalid authentication callback URL.' };
   }
 
-  return {
-    error: null,
-    accessToken: params.access_token ?? null,
-    refreshToken: params.refresh_token ?? null,
-  };
+  const error = singleParam(actual.queryParams?.error_description) ?? singleParam(actual.queryParams?.error);
+  if (error) return { code: null, error };
+
+  const code = singleParam(actual.queryParams?.code);
+  if (!code) return { code: null, error: 'The authentication code is missing or expired.' };
+
+  return { code, error: null };
 }

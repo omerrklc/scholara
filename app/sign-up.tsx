@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { BrandMark, Button, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import { getAuthRedirectUrl } from '@/services/auth';
+import { publicAuthError } from '@/services/authErrors';
 import { supabase } from '@/services/supabase';
 import { spacing } from '@/theme/tokens';
 
@@ -13,7 +14,7 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const valid = fullName.trim().length >= 2 && email.includes('@') && password.length >= 8;
+  const valid = fullName.trim().length >= 2 && email.includes('@') && password.length >= 12;
 
   const signUp = async () => {
     if (!supabase || !valid) return;
@@ -29,7 +30,7 @@ export default function SignUpScreen() {
     });
     setLoading(false);
     if (signUpError) {
-      setError(signUpError.message);
+      setError(publicAuthError(signUpError, 'sign-up'));
       return;
     }
     if (data.session) {
@@ -46,9 +47,9 @@ export default function SignUpScreen() {
     <SectionTitle eyebrow="Create account" title="Start with your academic identity." subtitle="Use an email address you can access. University verification will be added later." />
     {error ? <MessageBanner message={error} /> : null}
     <View style={styles.form}>
-      <Field label="Full name" autoComplete="name" placeholder="Your full name" value={fullName} onChangeText={setFullName} />
-      <Field label="Email" autoCapitalize="none" autoComplete="email" keyboardType="email-address" placeholder="you@university.edu" value={email} onChangeText={setEmail} />
-      <PasswordField label="Password" autoComplete="new-password" placeholder="At least 8 characters" value={password} onChangeText={setPassword} />
+      <Field label="Full name" autoComplete="name" maxLength={100} placeholder="Your full name" value={fullName} onChangeText={setFullName} />
+      <Field label="Email" autoCapitalize="none" autoComplete="email" keyboardType="email-address" maxLength={320} placeholder="you@university.edu" value={email} onChangeText={setEmail} />
+      <PasswordField label="Password" autoComplete="new-password" maxLength={128} placeholder="At least 12 characters" value={password} onChangeText={setPassword} />
     </View>
     <Button label={loading ? 'Creating account…' : 'Create account'} disabled={!valid || loading} onPress={() => void signUp()} />
     <Button label="I already have an account" variant="ghost" onPress={() => router.replace('/sign-in')} />

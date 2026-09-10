@@ -1,7 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Session } from '@supabase/supabase-js';
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
 import { AppState as NativeAppState, Platform } from 'react-native';
+import { fetchDiscoveryActions, requestConnection, setSavedProfile, type ConnectionState } from '@/services/connections';
 import { fetchProfile, saveProfile } from '@/services/profiles';
 import { isSupabaseConfigured, supabase } from '@/services/supabase';
 import type { Profile } from '@/types/domain';
@@ -17,20 +17,20 @@ type AppState = {
   profile: Profile;
   onboardingComplete: boolean;
   saved: string[];
-  connected: string[];
+  connectionStates: Record<string, ConnectionState>;
   session: Session | null;
   authReady: boolean;
   profileLoading: boolean;
   isSupabaseConfigured: boolean;
   updateProfile: (next: Profile) => void;
   completeOnboarding: (next: Profile) => Promise<string | null>;
-  toggleSaved: (id: string) => void;
-  connect: (id: string) => void;
+  toggleSaved: (id: string) => Promise<string | null>;
+  connect: (id: string) => Promise<{ state: ConnectionState | null; error: string | null }>;
+  refreshActions: () => Promise<string | null>;
   signOut: () => Promise<string | null>;
 };
 
 const AppContext = createContext<AppState | null>(null);
-const LOCAL_STATE_KEY = 'scholara.phase2.local-state';
 
 function profileFromSession(session: Session): Profile {
   const fullName = typeof session.user.user_metadata.full_name === 'string' ? session.user.user_metadata.full_name : '';
@@ -41,27 +41,10 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [profile, setProfile] = useState(initialProfile);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [saved, setSaved] = useState<string[]>([]);
-  const [connected, setConnected] = useState<string[]>([]);
+  const [connectionStates, setConnectionStates] = useState<Record<string, ConnectionState>>({});
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
   const [profileLoading, setProfileLoading] = useState(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem(LOCAL_STATE_KEY).then((raw) => {
-      if (!raw) return;
-      try {
-        const data = JSON.parse(raw) as Partial<{ saved: string[]; connected: string[] }>;
-        if (data.saved) setSaved(data.saved);
-        if (data.connected) setConnected(data.connected);
-      } catch {
-        // Ignore malformed non-sensitive prototype preferences.
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    void AsyncStorage.setItem(LOCAL_STATE_KEY, JSON.stringify({ saved, connected }));
-  }, [saved, connected]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -73,6 +56,8 @@ export function AppProvider({ children }: PropsWithChildren) {
       if (!nextSession) {
         setProfile(initialProfile);
         setOnboardingComplete(false);
+        setSaved([]);
+        setConnectionStates({});
         setProfileLoading(false);
         setAuthReady(true);
         return;
@@ -80,10 +65,15 @@ export function AppProvider({ children }: PropsWithChildren) {
 
       setProfileLoading(true);
       setProfile(profileFromSession(nextSession));
-      const result = await fetchProfile(nextSession.user.id);
+      const [result, actions] = await Promise.all([
+        fetchProfile(nextSession.user.id),
+        fetchDiscoveryActions(nextSession.user.id),
+      ]);
       if (!active) return;
       if (result.profile) setProfile(result.profile);
       setOnboardingComplete(result.completed);
+      setSaved(actions.saved);
+      setConnectionStates(actions.connectionStates);
       setProfileLoading(false);
       setAuthReady(true);
     };
@@ -116,7 +106,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, []);
 
   const value = useMemo<AppState>(() => ({
-    profile, onboardingComplete, saved, connected, session, authReady, profileLoading, isSupabaseConfigured,
+    profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, isSupabaseConfigured,
     updateProfile: setProfile,
     completeOnboarding: async (next) => {
       if (!session) return 'You need to sign in before saving your profile.';
@@ -127,14 +117,34 @@ export function AppProvider({ children }: PropsWithChildren) {
       }
       return error;
     },
-    toggleSaved: (id) => setSaved((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id]),
-    connect: (id) => setConnected((items) => items.includes(id) ? items : [...items, id]),
+    toggleSaved: async (id) => {
+      if (!session) return 'You need to sign in first.';
+      const shouldSave = !saved.includes(id);
+      const error = await setSavedProfile(session.user.id, id, shouldSave);
+      if (!error) setSaved((items) => shouldSave ? [...items, id] : items.filter((item) => item !== id));
+      return error;
+    },
+    connect: async (id) => {
+      if (!session) return { state: null, error: 'You need to sign in first.' };
+      const result = await requestConnection(id);
+      if (result.state) setConnectionStates((current) => ({ ...current, [id]: result.state }));
+      return result;
+    },
+    refreshActions: async () => {
+      if (!session) return 'You need to sign in first.';
+      const result = await fetchDiscoveryActions(session.user.id);
+      if (!result.error) {
+        setSaved(result.saved);
+        setConnectionStates(result.connectionStates);
+      }
+      return result.error;
+    },
     signOut: async () => {
       if (!supabase) return 'Supabase is not configured.';
       const { error } = await supabase.auth.signOut();
       return error?.message ?? null;
     },
-  }), [profile, onboardingComplete, saved, connected, session, authReady, profileLoading]);
+  }), [profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

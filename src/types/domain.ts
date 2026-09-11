@@ -15,10 +15,13 @@ export type Profile = {
   intents: string[];
   currentCity: string;
   currentCountry: string;
+  showCurrentLocation: boolean;
   isRelocating: boolean;
   destinationCity: string;
   destinationCountry: string;
   relocationDate: string;
+  showRelocationDestination: boolean;
+  showRelocationDate: boolean;
   languages: Language[];
 };
 
@@ -37,14 +40,4 @@ export type Researcher = {
   score: number;
   reason: string;
   color: string;
-};
-
-export type CommunityPost = {
-  id: string;
-  author: string;
-  context: string;
-  body: string;
-  community: string;
-  replies: number;
-  helpful: number;
 };

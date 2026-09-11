@@ -15,7 +15,7 @@ export function ResearcherCard({ person, saved, connectionState, saving = false,
       <View style={styles.identity}><Text style={styles.name}>{person.name}</Text><Text style={styles.meta}>{person.stage}</Text><Text style={styles.meta}>{person.university}</Text></View>
       <View style={styles.right}><View style={styles.score}><Text style={styles.scoreNumber}>{person.score}%</Text><Text style={styles.scoreLabel}>MATCH</Text></View>{onSafety ? <Pressable accessibilityLabel={`Safety options for ${person.name}`} accessibilityRole="button" hitSlop={8} onPress={onSafety} style={styles.more}><Ionicons name="ellipsis-horizontal" size={20} color={colors.inkMuted} /></Pressable> : null}</View>
     </View>
-    <View style={styles.locationRow}><Ionicons name="location-outline" size={16} color={colors.inkMuted} /><Text style={styles.location}>{person.location}</Text></View>
+    {person.location ? <View style={styles.locationRow}><Ionicons name="location-outline" size={16} color={colors.inkMuted} /><Text style={styles.location}>{person.location}</Text></View> : null}
     {person.destination && <View style={styles.moving}><Ionicons name="airplane-outline" size={17} color={colors.primary} /><Text style={styles.movingText}>Moving to {person.destination}{person.arrival ? ` · ${person.arrival}` : ''}</Text></View>}
     <View style={styles.tags}>{person.tags.map((tag) => <Chip key={tag} label={tag} />)}</View>
     <Text style={styles.research}>{person.research}</Text>

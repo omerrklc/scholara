@@ -3,13 +3,14 @@ import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { BrandMark, Button, MessageBanner, Screen, SectionTitle } from '@/components/ui';
+import { consumeAuthCodeOnce } from '@/services/authCallback';
 import { getAuthCodeFromUrl } from '@/services/auth';
 import { supabase } from '@/services/supabase';
 import { colors, spacing } from '@/theme/tokens';
 
 export default function AuthCallbackScreen() {
   const [error, setError] = useState('');
-  const processedUrls = useRef(new Set<string>());
+  const processedCodes = useRef(new Set<string>());
 
   useEffect(() => {
     let active = true;
@@ -20,22 +21,20 @@ export default function AuthCallbackScreen() {
         setError('Doğrulama bağlantısı açılamadı. Giriş ekranından devam edebilirsin.');
         return;
       }
-      if (processedUrls.current.has(url)) return;
-      processedUrls.current.add(url);
-
       const callback = getAuthCodeFromUrl(url);
       if (callback.error || !callback.code) {
-        setError(callback.error ?? 'Doğrulama kodu bulunamadı.');
+        setError('Doğrulama bağlantısı geçersiz veya süresi dolmuş. Yeni bir bağlantı isteyebilirsin.');
         return;
       }
+      if (!consumeAuthCodeOnce(processedCodes.current, callback.code)) return;
 
       const { error: sessionError } = await supabase.auth.exchangeCodeForSession(callback.code);
       if (!active) return;
       if (sessionError) {
-        setError(sessionError.message);
+        setError('Bu doğrulama bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış. Yeni bir bağlantı isteyebilirsin.');
         return;
       }
-      router.replace('/onboarding');
+      router.replace(callback.nextRoute);
     };
 
     void Linking.getInitialURL().then(completeVerification);

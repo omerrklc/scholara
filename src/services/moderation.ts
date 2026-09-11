@@ -1,7 +1,7 @@
 import { supabase } from '@/services/supabase';
 
 export type ReportReason = 'spam' | 'harassment' | 'impersonation' | 'inappropriate_content' | 'privacy' | 'other';
-export type SafetySource = 'discover' | 'matches' | 'chat' | 'profile';
+export type SafetySource = 'discover' | 'matches' | 'chat' | 'profile' | 'community';
 
 export type BlockedUser = {
   id: string;
@@ -31,6 +31,30 @@ export async function reportUser(targetUserId: string, reasons: ReportReason[], 
     report_reasons: reasons,
     report_details: details.trim().slice(0, 1000),
     report_source: source,
+  });
+  if (!error) return null;
+  if (error.message.toLowerCase().includes('daily report limit')) return 'You have reached today\'s report limit.';
+  return 'Your report could not be submitted. Please try again.';
+}
+
+export async function reportCommunityPost(postId: string, reasons: ReportReason[], details: string) {
+  if (!supabase) return 'Reporting is not configured.';
+  const { error } = await supabase.rpc('report_community_post', {
+    target_post_id: postId,
+    report_reasons: reasons,
+    report_details: details.trim().slice(0, 1000),
+  });
+  if (!error) return null;
+  if (error.message.toLowerCase().includes('daily report limit')) return 'You have reached today\'s report limit.';
+  return 'Your report could not be submitted. Please try again.';
+}
+
+export async function reportCommunityComment(commentId: string, reasons: ReportReason[], details: string) {
+  if (!supabase) return 'Reporting is not configured.';
+  const { error } = await supabase.rpc('report_community_comment', {
+    target_comment_id: commentId,
+    report_reasons: reasons,
+    report_details: details.trim().slice(0, 1000),
   });
   if (!error) return null;
   if (error.message.toLowerCase().includes('daily report limit')) return 'You have reached today\'s report limit.';

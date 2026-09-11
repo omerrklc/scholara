@@ -2,6 +2,8 @@ node_modules/
 .expo/
 dist/
 web-build/
+supabase/.temp/
+supabase/.branches/
 .env
 .env.local
 npm-debug.log*

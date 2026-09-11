@@ -62,7 +62,6 @@ export async function fetchConversation(otherUserId: string) {
   if (!supabase) return { messages: [] as ChatMessage[], error: 'Messaging is not configured.' };
   const { data, error } = await supabase.rpc('get_conversation_messages', {
     other_user_id: otherUserId,
-    before_time: null,
     page_size: 100,
   });
   if (error) return { messages: [] as ChatMessage[], error: 'Messages could not be loaded.' };

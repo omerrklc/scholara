@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { blockUser, reportUser, type ReportReason, type SafetySource } from '@/services/moderation';
+import { blockUser, reportCommunityComment, reportCommunityPost, reportUser, type ReportReason, type SafetySource } from '@/services/moderation';
 import { Button, Chip, Field, MessageBanner } from '@/components/ui';
 import { colors, radius, shadow, spacing } from '@/theme/tokens';
 
@@ -15,7 +15,7 @@ const reasons: { value: ReportReason; label: string }[] = [
   { value: 'other', label: 'Other' },
 ];
 
-export function SafetySheet({ targetId, targetName, source, onClose, onBlocked }: { targetId: string; targetName: string; source: SafetySource; onClose: () => void; onBlocked: () => void }) {
+export function SafetySheet({ targetId, targetName, source, contextPostId, contextCommentId, onClose, onBlocked }: { targetId: string; targetName: string; source: SafetySource; contextPostId?: string; contextCommentId?: string; onClose: () => void; onBlocked: () => void }) {
   const [selectedReasons, setSelectedReasons] = useState<ReportReason[]>([]);
   const [details, setDetails] = useState('');
   const [confirmingBlock, setConfirmingBlock] = useState(false);
@@ -27,7 +27,11 @@ export function SafetySheet({ targetId, targetName, source, onClose, onBlocked }
     if (!selectedReasons.length || busy) return;
     setBusy(true);
     setError('');
-    const result = await reportUser(targetId, selectedReasons, details, source);
+    const result = source === 'community' && contextCommentId
+      ? await reportCommunityComment(contextCommentId, selectedReasons, details)
+      : source === 'community' && contextPostId
+        ? await reportCommunityPost(contextPostId, selectedReasons, details)
+        : await reportUser(targetId, selectedReasons, details, source);
     setBusy(false);
     if (result) setError(result);
     else setReported(true);

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { router, type Href, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Chip, MessageBanner, Screen } from '@/components/ui';
@@ -53,6 +53,7 @@ export default function ProfileScreen() {
       <Button label="Refresh blocked users" variant="ghost" disabled={blockedLoading} onPress={() => void loadBlockedUsers()} />
     </Card>
     <Button label="Edit onboarding profile" variant="secondary" onPress={() => router.push('/onboarding')} />
+    <Button label="Account & privacy settings" variant="secondary" icon={<Ionicons name="settings-outline" size={20} color={colors.ink} />} onPress={() => router.push('/settings' as Href)} />
     {session ? <Button label="Sign out" variant="ghost" onPress={() => void logOut()} /> : null}
   </Screen>;
 }

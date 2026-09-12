@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { rowToProfile } from './profileMapping';
 
 const baseRow = {
-  full_name: 'Ada Researcher', username: 'ada_researcher', academic_stage: 'PhD student',
+  full_name: 'Ada Researcher', username: 'ada_researcher', avatar_path: 'ada/avatar.jpg', academic_stage: 'PhD student',
   university: 'Example University', department: 'Planning', program: 'PhD',
   research_description: 'Research description', research_interests: ['Mobility'], intents: ['Collaborate'],
   current_city: 'Istanbul', current_country: 'Türkiye', show_current_location: false,
@@ -20,5 +20,9 @@ describe('profile database boundary', () => {
 
   it('falls back safely for an unknown academic stage', () => {
     expect(rowToProfile({ ...baseRow, academic_stage: 'Administrator', languages: [] }).academicStage).toBe('');
+  });
+
+  it('maps the private storage path without turning it into a public URL', () => {
+    expect(rowToProfile({ ...baseRow, languages: [] }).avatarPath).toBe('ada/avatar.jpg');
   });
 });

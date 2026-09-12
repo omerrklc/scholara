@@ -1,10 +1,11 @@
 import { supabase } from '@/services/supabase';
+import { createProfilePhotoUrls } from '@/services/profilePhotos';
 import { rowToProfile, type ProfileRow } from '@/services/profiles';
 import type { DiscoveryMode, Profile, Researcher } from '@/types/domain';
 
-type DiscoveryProfile = Profile & { id: string };
+type DiscoveryProfile = Profile & { id: string; avatarUrl?: string };
 type DiscoveryProfileRow = Pick<ProfileRow,
-  'full_name' | 'academic_stage' | 'university' | 'department' | 'program' |
+  'full_name' | 'avatar_path' | 'academic_stage' | 'university' | 'department' | 'program' |
   'research_description' | 'research_interests' | 'intents' | 'current_city' |
   'current_country' | 'is_relocating' | 'destination_city' | 'destination_country' |
   'relocation_date'
@@ -74,6 +75,7 @@ function toResearcher(viewer: Profile, candidate: DiscoveryProfile, mode: Discov
   return {
     id: candidate.id,
     initials: initials(candidate.fullName),
+    avatarUrl: candidate.avatarUrl,
     name: candidate.fullName || candidate.username,
     stage: candidate.academicStage || 'Researcher',
     university: candidate.university || candidate.department,
@@ -101,10 +103,12 @@ export async function fetchDiscoveryProfiles(currentUserId: string) {
   const { data, error } = await supabase.rpc('discover_profiles');
 
   if (error) return { profiles: [] as DiscoveryProfile[], error: error.message };
-  const profiles = (data as unknown as DiscoveryProfileRow[])
-    .filter((row) => row.id !== currentUserId)
+  const rows = (data as unknown as DiscoveryProfileRow[]).filter((row) => row.id !== currentUserId);
+  const photoUrls = await createProfilePhotoUrls(rows.map((row) => row.avatar_path ?? ''));
+  const profiles = rows
     .map((row) => ({
       id: row.id,
+      avatarUrl: row.avatar_path ? photoUrls.get(row.avatar_path) : undefined,
       ...rowToProfile({
         ...row,
         username: '',

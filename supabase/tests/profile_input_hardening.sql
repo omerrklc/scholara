@@ -1,6 +1,6 @@
 begin;
 
-select plan(16);
+select plan(17);
 
 select ok(public.is_valid_bounded_text_array(array['GIS', 'Mobility'], 20, 60), 'accepts valid interests');
 select isnt(public.is_valid_bounded_text_array(array_fill('x'::text, array[21]), 20, 60), true, 'rejects too many interests');
@@ -17,6 +17,7 @@ select isnt(public.is_valid_languages('[{}]'::jsonb), true, 'rejects missing lan
 select isnt(public.is_valid_languages('[{"name":"English"}]'::jsonb), true, 'requires proficiency');
 select isnt(public.is_valid_languages('[{"proficiency":"Fluent"}]'::jsonb), true, 'requires language name');
 select isnt(public.is_valid_languages('["English"]'::jsonb), true, 'rejects scalar array elements without throwing');
+select isnt(public.is_valid_languages('[{"name":"English","proficiency":"Fluent"},{"name":" english ","proficiency":"Native"}]'::jsonb), true, 'rejects duplicate language names');
 
 select ok(exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass
   and conname = 'profiles_research_interests_shape' and contype = 'c'), 'interests CHECK exists');

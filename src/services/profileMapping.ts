@@ -1,7 +1,7 @@
 import type { Profile } from '../types/domain';
 
 export type ProfileRow = {
-  full_name: string; username: string; academic_stage: Profile['academicStage']; university: string;
+  full_name: string; username: string; avatar_path?: string; academic_stage: Profile['academicStage']; university: string;
   department: string; program: string; research_description: string; research_interests: string[];
   intents: string[]; current_city: string; current_country: string; show_current_location?: boolean;
   is_relocating: boolean; destination_city: string; destination_country: string; relocation_date: string;
@@ -27,7 +27,7 @@ function validLanguages(value: unknown): Profile['languages'] {
 
 export function rowToProfile(row: ProfileResultRow): Profile {
   return {
-    fullName: row.full_name, username: row.username, academicStage: validAcademicStage(row.academic_stage),
+    fullName: row.full_name, username: row.username, avatarPath: row.avatar_path ?? '', academicStage: validAcademicStage(row.academic_stage),
     university: row.university, department: row.department, program: row.program,
     researchDescription: row.research_description, researchInterests: row.research_interests ?? [],
     intents: row.intents ?? [], currentCity: row.current_city, currentCountry: row.current_country,
@@ -42,7 +42,7 @@ export function profileToRow(profile: Profile, userId: string) {
   const boundedList = (items: string[], maxItems: number, maxLength: number) => items
     .map((item) => item.trim().slice(0, maxLength)).filter(Boolean).slice(0, maxItems);
   return {
-    id: userId, full_name: profile.fullName.trim().slice(0, 100),
+    id: userId, full_name: profile.fullName.trim().slice(0, 100), avatar_path: profile.avatarPath,
     username: profile.username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30),
     academic_stage: profile.academicStage, university: profile.university.trim().slice(0, 160),
     department: profile.department.trim().slice(0, 120), program: profile.program.trim().slice(0, 160),

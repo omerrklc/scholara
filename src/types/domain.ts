@@ -6,6 +6,7 @@ export type Language = { name: string; proficiency: string };
 export type Profile = {
   fullName: string;
   username: string;
+  avatarPath: string;
   academicStage: AcademicStage | '';
   university: string;
   department: string;
@@ -28,6 +29,7 @@ export type Profile = {
 export type Researcher = {
   id: string;
   initials: string;
+  avatarUrl?: string;
   name: string;
   stage: string;
   university: string;

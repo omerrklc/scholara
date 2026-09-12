@@ -27,7 +27,13 @@
       "expo-router",
       "expo-status-bar",
       "expo-splash-screen",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Scholara to access the photo you choose for your academic profile."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

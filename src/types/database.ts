@@ -335,6 +335,7 @@ export type Database = {
       profiles: {
         Row: {
           academic_stage: string
+          avatar_path: string
           created_at: string
           current_city: string
           current_country: string
@@ -360,6 +361,7 @@ export type Database = {
         }
         Insert: {
           academic_stage?: string
+          avatar_path?: string
           created_at?: string
           current_city?: string
           current_country?: string
@@ -385,6 +387,7 @@ export type Database = {
         }
         Update: {
           academic_stage?: string
+          avatar_path?: string
           created_at?: string
           current_city?: string
           current_country?: string
@@ -576,6 +579,7 @@ export type Database = {
         Args: never
         Returns: {
           academic_stage: string
+          avatar_path: string
           current_city: string
           current_country: string
           department: string
@@ -591,6 +595,10 @@ export type Database = {
           research_interests: string[]
           university: string
         }[]
+      }
+      can_view_profile_photo: {
+        Args: { target_user_id: string }
+        Returns: boolean
       }
       get_account_settings: { Args: never; Returns: Json }
       get_blocked_users: {
@@ -884,4 +892,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

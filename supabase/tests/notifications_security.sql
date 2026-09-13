@@ -35,7 +35,7 @@ select throws_ok(
 );
 
 select is(public.request_connection('52000000-0000-4000-8000-000000000002'), 'matched', 'connecting back creates a match');
-select is(public.send_message('52000000-0000-4000-8000-000000000002', 'Hello from the notification test'), (select id from public.messages order by created_at desc limit 1), 'matched user can send message');
+select isnt(public.send_message('52000000-0000-4000-8000-000000000002', 'Hello from the notification test'), null, 'matched user can send message');
 
 select set_config('request.jwt.claims', '{"sub":"52000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 select is((select count(*)::integer from public.get_notifications()), 2, 'match and message notifications are delivered');

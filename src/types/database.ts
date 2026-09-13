@@ -601,6 +601,31 @@ export type Database = {
         Returns: boolean
       }
       get_account_settings: { Args: never; Returns: Json }
+      get_profile_detail: {
+        Args: { target_profile_id: string }
+        Returns: {
+          academic_stage: string
+          avatar_path: string
+          connection_state: string
+          current_city: string
+          current_country: string
+          department: string
+          destination_city: string
+          destination_country: string
+          full_name: string
+          id: string
+          intents: string[]
+          is_relocating: boolean
+          languages: Json
+          program: string
+          relocation_date: string
+          research_description: string
+          research_interests: string[]
+          university: string
+          username: string
+          viewer_saved: boolean
+        }[]
+      }
       get_blocked_users: {
         Args: never
         Returns: {

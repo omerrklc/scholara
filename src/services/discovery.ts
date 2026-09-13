@@ -68,7 +68,7 @@ function movingMatch(viewer: Profile, candidate: Profile) {
   return { relevant, score, reason };
 }
 
-function toResearcher(viewer: Profile, candidate: DiscoveryProfile, mode: DiscoveryMode): Researcher | null {
+export function toResearcher(viewer: Profile, candidate: DiscoveryProfile, mode: DiscoveryMode): Researcher | null {
   const match = mode === 'moving' ? movingMatch(viewer, candidate) : { ...researchMatch(viewer, candidate), relevant: true };
   if (!match.relevant) return null;
 

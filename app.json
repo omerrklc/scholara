@@ -28,6 +28,7 @@
       "expo-status-bar",
       "expo-splash-screen",
       "expo-secure-store",
+      "expo-notifications",
       [
         "expo-image-picker",
         {
@@ -37,6 +38,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "80e885fb-8df2-4262-8972-f07ace845921"
+      }
+    },
+    "owner": "sentema"
   }
 }

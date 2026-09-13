@@ -3,7 +3,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useSt
 import { AppState as NativeAppState, Platform } from 'react-native';
 import { fetchDiscoveryActions, requestConnection, setSavedProfile, type ConnectionState } from '@/services/connections';
 import { fetchProfile, saveProfile } from '@/services/profiles';
-import { fetchUnreadNotificationCount } from '@/services/notifications';
+import { fetchUnreadNotificationCount, subscribeToNotificationInserts } from '@/services/notifications';
 import { isSupabaseConfigured, supabase } from '@/services/supabase';
 import type { Profile } from '@/types/domain';
 
@@ -111,6 +111,20 @@ export function AppProvider({ children }: PropsWithChildren) {
       client.auth.stopAutoRefresh();
     };
   }, []);
+
+  useEffect(() => {
+    if (!session?.user.id) return;
+    let active = true;
+    const unsubscribe = subscribeToNotificationInserts(session.user.id, () => {
+      void fetchUnreadNotificationCount().then((count) => {
+        if (active) setUnreadNotifications(count);
+      });
+    });
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [session?.user.id]);
 
   const value = useMemo<AppState>(() => ({
     profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications, isSupabaseConfigured,

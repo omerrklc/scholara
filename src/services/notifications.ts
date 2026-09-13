@@ -67,3 +67,19 @@ export async function markAllNotificationsRead() {
   const { error } = await supabase.rpc('mark_all_notifications_read');
   return error ? 'Notifications could not be updated.' : null;
 }
+
+export function subscribeToNotificationInserts(userId: string, onInsert: () => void) {
+  if (!supabase) return () => undefined;
+  const client = supabase;
+  const channel = client
+    .channel(`notification-inserts:${userId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications',
+      filter: `user_id=eq.${userId}`,
+    }, onInsert)
+    .subscribe();
+
+  return () => { void client.removeChannel(channel); };
+}

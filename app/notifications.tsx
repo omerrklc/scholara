@@ -19,7 +19,7 @@ const initials = (name: string) => name.trim().split(/\s+/).filter(Boolean).slic
 const timeLabel = (value: string) => new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export default function NotificationsScreen() {
-  const { authReady, refreshNotifications, session } = useApp();
+  const { authReady, refreshNotifications, session, unreadNotifications } = useApp();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -35,7 +35,12 @@ export default function NotificationsScreen() {
     void refreshNotifications();
   }, [refreshNotifications]);
 
-  useFocusEffect(useCallback(() => { if (session) void load(); }, [load, session]));
+  useFocusEffect(useCallback(() => {
+    if (!session) return;
+    // Keep an open notification list in sync with realtime unread-count changes.
+    void unreadNotifications;
+    void load();
+  }, [load, session, unreadNotifications]));
 
   const openNotification = async (item: NotificationItem) => {
     if (!item.readAt) {

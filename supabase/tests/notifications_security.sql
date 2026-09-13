@@ -1,5 +1,15 @@
 begin;
-select plan(21);
+select plan(22);
+
+select ok(
+  exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'notifications'
+  ),
+  'notifications are published for realtime delivery'
+);
 
 insert into auth.users (id, email, encrypted_password, raw_app_meta_data, raw_user_meta_data, aud, role)
 values

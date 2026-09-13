@@ -3,6 +3,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useSt
 import { AppState as NativeAppState, Platform } from 'react-native';
 import { fetchDiscoveryActions, requestConnection, setSavedProfile, type ConnectionState } from '@/services/connections';
 import { fetchProfile, saveProfile } from '@/services/profiles';
+import { fetchUnreadNotificationCount } from '@/services/notifications';
 import { isSupabaseConfigured, supabase } from '@/services/supabase';
 import type { Profile } from '@/types/domain';
 
@@ -21,12 +22,14 @@ type AppState = {
   session: Session | null;
   authReady: boolean;
   profileLoading: boolean;
+  unreadNotifications: number;
   isSupabaseConfigured: boolean;
   updateProfile: (next: Profile) => void;
   completeOnboarding: (next: Profile) => Promise<string | null>;
   toggleSaved: (id: string) => Promise<string | null>;
   connect: (id: string) => Promise<{ state: ConnectionState | null; error: string | null }>;
   refreshActions: () => Promise<string | null>;
+  refreshNotifications: () => Promise<void>;
   signOut: () => Promise<string | null>;
 };
 
@@ -45,6 +48,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
     if (!supabase) return;
@@ -58,6 +62,7 @@ export function AppProvider({ children }: PropsWithChildren) {
         setOnboardingComplete(false);
         setSaved([]);
         setConnectionStates({});
+        setUnreadNotifications(0);
         setProfileLoading(false);
         setAuthReady(true);
         return;
@@ -65,15 +70,17 @@ export function AppProvider({ children }: PropsWithChildren) {
 
       setProfileLoading(true);
       setProfile(profileFromSession(nextSession));
-      const [result, actions] = await Promise.all([
+      const [result, actions, unreadCount] = await Promise.all([
         fetchProfile(nextSession.user.id),
         fetchDiscoveryActions(nextSession.user.id),
+        fetchUnreadNotificationCount(),
       ]);
       if (!active) return;
       if (result.profile) setProfile(result.profile);
       setOnboardingComplete(result.completed);
       setSaved(actions.saved);
       setConnectionStates(actions.connectionStates);
+      setUnreadNotifications(unreadCount);
       setProfileLoading(false);
       setAuthReady(true);
     };
@@ -106,7 +113,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   }, []);
 
   const value = useMemo<AppState>(() => ({
-    profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, isSupabaseConfigured,
+    profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications, isSupabaseConfigured,
     updateProfile: setProfile,
     completeOnboarding: async (next) => {
       if (!session) return 'You need to sign in before saving your profile.';
@@ -139,12 +146,19 @@ export function AppProvider({ children }: PropsWithChildren) {
       }
       return result.error;
     },
+    refreshNotifications: async () => {
+      if (!session) {
+        setUnreadNotifications(0);
+        return;
+      }
+      setUnreadNotifications(await fetchUnreadNotificationCount());
+    },
     signOut: async () => {
       if (!supabase) return 'Supabase is not configured.';
       const { error } = await supabase.auth.signOut();
       return error?.message ?? null;
     },
-  }), [profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading]);
+  }), [profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

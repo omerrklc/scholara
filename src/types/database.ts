@@ -332,6 +332,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_key: string
+          id: string
+          kind: string
+          read_at: string | null
+          resource_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_key: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          resource_id?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_key?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          resource_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           academic_stage: string
@@ -701,6 +742,20 @@ export type Database = {
           unread_count: number
         }[]
       }
+      get_notifications: {
+        Args: { before_time?: string; page_size?: number }
+        Returns: {
+          actor_avatar_path: string
+          actor_id: string | null
+          actor_name: string
+          created_at: string
+          kind: string
+          notification_id: string
+          read_at: string | null
+          resource_id: string | null
+        }[]
+      }
+      get_unread_notification_count: { Args: never; Returns: number }
       is_blocked_with: { Args: { target_user_id: string }; Returns: boolean }
       is_discoverable_profile: {
         Args: { target_profile_id: string }
@@ -718,6 +773,11 @@ export type Database = {
       mark_conversation_read: {
         Args: { other_user_id: string }
         Returns: number
+      }
+      mark_all_notifications_read: { Args: never; Returns: number }
+      mark_notification_read: {
+        Args: { target_notification_id: string }
+        Returns: boolean
       }
       report_community_comment: {
         Args: {

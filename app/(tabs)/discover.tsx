@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ResearcherCard } from '@/components/ResearcherCard';
+import { NotificationBell } from '@/components/NotificationBell';
 import { SafetySheet } from '@/components/SafetySheet';
 import { BrandMark, Button, Card, MessageBanner, Screen, SectionTitle, SegmentedControl } from '@/components/ui';
 import { fetchDiscoveryProfiles, rankResearchers } from '@/services/discovery';
@@ -78,7 +79,7 @@ export default function DiscoverScreen() {
   };
 
   return <Screen>
-    <View style={styles.header}><BrandMark compact /><View><Text style={styles.greeting}>Good afternoon</Text><Text style={styles.question}>Who should you know?</Text></View></View>
+    <View style={styles.header}><BrandMark compact /><View style={styles.headerText}><Text style={styles.greeting}>Good afternoon</Text><Text style={styles.question}>Who should you know?</Text></View><NotificationBell /></View>
     <SegmentedControl value={mode} onChange={changeMode} options={[{ label: 'Research', value: 'research' }, { label: 'Moving', value: 'moving' }]} />
     <SectionTitle eyebrow={mode === 'research' ? 'Based on your research' : 'Based on your next city'} title={mode === 'research' ? 'A relevant researcher' : 'A useful local connection'} subtitle={mode === 'moving' ? 'People already there—or arriving around the same time.' : 'Similarity is explained, not hidden behind a score.'} />
     {actionError ? <MessageBanner message={actionError} /> : null}
@@ -96,4 +97,4 @@ export default function DiscoverScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }, greeting: { color: colors.inkMuted, fontSize: 12 }, question: { color: colors.ink, fontSize: 18, fontWeight: '800' }, state: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, stateTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', textAlign: 'center' }, stateText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21, marginBottom: spacing.xs }, note: { textAlign: 'center', color: colors.inkMuted, fontSize: 11, lineHeight: 16, paddingHorizontal: spacing.lg } });
+const styles = StyleSheet.create({ header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }, headerText: { flex: 1, minWidth: 0 }, greeting: { color: colors.inkMuted, fontSize: 12 }, question: { color: colors.ink, fontSize: 18, fontWeight: '800' }, state: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, stateTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', textAlign: 'center' }, stateText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21, marginBottom: spacing.xs }, note: { textAlign: 'center', color: colors.inkMuted, fontSize: 11, lineHeight: 16, paddingHorizontal: spacing.lg } });

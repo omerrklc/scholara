@@ -6,6 +6,8 @@ supabase/.temp/
 supabase/.branches/
 .env
 .env.local
+google-services.json
+*-firebase-adminsdk-*.json
 npm-debug.log*
 pnpm-debug.log*
 *.jks

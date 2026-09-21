@@ -9,6 +9,7 @@ import {
   moderateReportedAccount,
   removeReportedContent,
   reviewModerationReport,
+  type BanDuration,
   type ModerationReport,
   type ModerationRole,
   type ModerationStatus,
@@ -21,6 +22,14 @@ const filters: { label: string; value: ModerationStatus }[] = [
   { label: 'Reviewing', value: 'reviewing' },
   { label: 'Resolved', value: 'resolved' },
   { label: 'Dismissed', value: 'dismissed' },
+];
+
+const banDurations: { label: string; value: BanDuration }[] = [
+  { label: '1 day', value: '1_day' },
+  { label: '1 week', value: '1_week' },
+  { label: '1 month', value: '1_month' },
+  { label: '1 year', value: '1_year' },
+  { label: 'Permanent', value: 'permanent' },
 ];
 
 const reasonLabels: Record<string, string> = {
@@ -46,6 +55,7 @@ export default function ModerationScreen() {
   const [message, setMessage] = useState('');
   const [selectedId, setSelectedId] = useState('');
   const [notes, setNotes] = useState('');
+  const [banDuration, setBanDuration] = useState<BanDuration>('1_week');
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -77,10 +87,12 @@ export default function ModerationScreen() {
     if (selectedId === report.id) {
       setSelectedId('');
       setNotes('');
+      setBanDuration('1_week');
       return;
     }
     setSelectedId(report.id);
     setNotes(report.reviewNotes);
+    setBanDuration('1_week');
     setMessage('');
   };
 
@@ -114,7 +126,7 @@ export default function ModerationScreen() {
     setMessage('');
     const actionError = action === 'remove'
       ? await removeReportedContent(report.id, notes)
-      : await moderateReportedAccount(report.id, action, notes);
+      : await moderateReportedAccount(report.id, action, notes, banDuration);
     setSaving(false);
     if (actionError) {
       setError(actionError);
@@ -122,17 +134,19 @@ export default function ModerationScreen() {
     }
     setSelectedId('');
     setNotes('');
-    setMessage(action === 'remove' ? 'The reported content was removed and the report was resolved.' : action === 'ban' ? 'The account was banned and the report was resolved.' : 'The account ban was lifted.');
+    const durationLabel = banDurations.find((option) => option.value === banDuration)?.label ?? 'selected period';
+    setMessage(action === 'remove' ? 'The reported content was removed and the report was resolved.' : action === 'ban' ? `The account was banned for ${durationLabel.toLowerCase()} and the report was resolved.` : 'The account ban was lifted.');
     const result = await fetchModerationReports(status);
     setReports(result.reports);
     setError(result.error ?? '');
   };
 
   const confirmEnforcement = (report: ModerationReport, action: 'remove' | 'ban' | 'unban') => {
+    const durationLabel = banDurations.find((option) => option.value === banDuration)?.label ?? 'the selected period';
     const copy = action === 'remove'
       ? { title: 'Remove reported content?', body: 'The post or reply will be permanently removed. The evidence snapshot and audit record will remain.', confirm: 'Remove content' }
       : action === 'ban'
-        ? { title: 'Ban this account?', body: 'The account will be hidden and blocked from signing in or creating interactions. This can be reversed by an administrator.', confirm: 'Ban account' }
+        ? { title: `Ban this account for ${durationLabel.toLowerCase()}?`, body: 'The account will be hidden and blocked from signing in or creating interactions. Timed bans end automatically; an administrator can also lift any ban early.', confirm: 'Ban account' }
         : { title: 'Restore this account?', body: 'The account will be allowed to sign in and participate again.', confirm: 'Lift ban' };
     Alert.alert(copy.title, copy.body, [
       { text: 'Cancel', style: 'cancel' },
@@ -161,7 +175,7 @@ export default function ModerationScreen() {
       <Button label="Go back" variant="secondary" onPress={() => router.back()} />
     </Card> : <>
       <View style={styles.roleRow}><Ionicons name="shield-checkmark-outline" size={19} color={colors.primary} /><Text style={styles.roleText}>{role === 'admin' ? 'Administrator' : 'Moderator'} access</Text></View>
-      <View accessibilityRole="tablist" style={styles.filters}>{filters.map((filter) => <Chip key={filter.value} label={filter.label} selected={status === filter.value} onPress={() => { setSelectedId(''); setNotes(''); setStatus(filter.value); }} />)}</View>
+      <View accessibilityRole="tablist" style={styles.filters}>{filters.map((filter) => <Chip key={filter.value} label={filter.label} selected={status === filter.value} onPress={() => { setSelectedId(''); setNotes(''); setBanDuration('1_week'); setStatus(filter.value); }} />)}</View>
       {reports.length === 0 ? <Card style={styles.center}><Ionicons name="checkmark-circle-outline" size={44} color={colors.primary} /><Text style={styles.emptyTitle}>No {status} reports</Text><Text style={styles.emptyText}>Nothing needs attention in this queue.</Text></Card> : reports.map((report) => {
         const selected = selectedId === report.id;
         const decisionReady = notes.trim().length >= 5;
@@ -195,6 +209,11 @@ export default function ModerationScreen() {
             <Text style={styles.counter}>{notes.length}/2000 · at least 5 characters for a final action</Text>
             {report.status !== 'reviewing' ? <Button label={saving ? 'Saving…' : 'Start review'} variant="secondary" disabled={saving} onPress={() => void updateReport(report.id, 'reviewing')} /> : null}
             {report.reportedContentExists ? <Button label={saving ? 'Saving…' : 'Remove reported content'} variant="danger" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'remove')} /> : null}
+            {role === 'admin' && report.reportedUserId && !report.accountBanned ? <View style={styles.banDuration}>
+              <Text style={styles.label}>BAN DURATION</Text>
+              <View accessibilityRole="radiogroup" style={styles.filters}>{banDurations.map((option) => <Chip key={option.value} label={option.label} selected={banDuration === option.value} onPress={() => setBanDuration(option.value)} />)}</View>
+              <Text style={styles.durationHint}>Timed bans are lifted automatically. Permanent bans remain until an administrator lifts them.</Text>
+            </View> : null}
             {role === 'admin' && report.reportedUserId && !report.accountBanned ? <Button label={saving ? 'Saving…' : 'Ban account'} variant="danger" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'ban')} /> : null}
             {role === 'admin' && report.reportedUserId && report.accountBanned ? <Button label={saving ? 'Saving…' : 'Lift account ban'} variant="secondary" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'unban')} /> : null}
             {report.status !== 'resolved' ? <Button label={saving ? 'Saving…' : 'Resolve without enforcement'} disabled={saving || !decisionReady} onPress={() => void updateReport(report.id, 'resolved')} /> : null}
@@ -216,5 +235,5 @@ function EvidenceRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerTitle: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: '900', textAlign: 'center' }, headerSpacer: { width: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, roleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.primarySoft }, roleText: { color: colors.primaryDark, fontSize: 12, fontWeight: '800' }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, report: { gap: spacing.sm }, reportHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, reportTitleWrap: { flex: 1, minWidth: 0, gap: 2 }, reportName: { color: colors.ink, fontSize: 17, fontWeight: '900' }, username: { color: colors.primary, fontSize: 12, fontWeight: '700' }, meta: { color: colors.inkMuted, fontSize: 11 }, reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, labeledText: { gap: 4, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, label: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 }, body: { color: colors.ink, fontSize: 14, lineHeight: 20 }, review: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, evidenceCard: { gap: spacing.xs, backgroundColor: colors.surfaceMuted, shadowOpacity: 0, elevation: 0 }, evidenceTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xs }, evidenceHeading: { color: colors.ink, fontWeight: '900' }, evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, evidenceLabel: { flex: 1, minWidth: 0, color: colors.inkMuted, fontSize: 12 }, evidenceValue: { color: colors.ink, fontWeight: '900' }, guidance: { color: colors.primaryDark, fontSize: 12, lineHeight: 18, fontWeight: '700', paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, counter: { alignSelf: 'flex-end', color: colors.inkMuted, fontSize: 10, marginTop: -spacing.xs, textAlign: 'right' }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '900', textAlign: 'center' }, emptyText: { color: colors.inkMuted, lineHeight: 20, textAlign: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerTitle: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: '900', textAlign: 'center' }, headerSpacer: { width: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, roleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.primarySoft }, roleText: { color: colors.primaryDark, fontSize: 12, fontWeight: '800' }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, report: { gap: spacing.sm }, reportHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, reportTitleWrap: { flex: 1, minWidth: 0, gap: 2 }, reportName: { color: colors.ink, fontSize: 17, fontWeight: '900' }, username: { color: colors.primary, fontSize: 12, fontWeight: '700' }, meta: { color: colors.inkMuted, fontSize: 11 }, reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, labeledText: { gap: 4, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, label: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 }, body: { color: colors.ink, fontSize: 14, lineHeight: 20 }, review: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, banDuration: { gap: spacing.xs, padding: spacing.sm, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceMuted }, durationHint: { color: colors.inkMuted, fontSize: 11, lineHeight: 16 }, evidenceCard: { gap: spacing.xs, backgroundColor: colors.surfaceMuted, shadowOpacity: 0, elevation: 0 }, evidenceTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xs }, evidenceHeading: { color: colors.ink, fontWeight: '900' }, evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, evidenceLabel: { flex: 1, minWidth: 0, color: colors.inkMuted, fontSize: 12 }, evidenceValue: { color: colors.ink, fontWeight: '900' }, guidance: { color: colors.primaryDark, fontSize: 12, lineHeight: 18, fontWeight: '700', paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, counter: { alignSelf: 'flex-end', color: colors.inkMuted, fontSize: 10, marginTop: -spacing.xs, textAlign: 'right' }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '900', textAlign: 'center' }, emptyText: { color: colors.inkMuted, lineHeight: 20, textAlign: 'center' },
 });

@@ -107,8 +107,10 @@ export type Database = {
       }
       moderation_account_bans: {
         Row: {
+          ban_duration: string
           banned_at: string
           banned_by: string | null
+          expires_at: string | null
           lift_reason: string
           lifted_at: string | null
           lifted_by: string | null
@@ -118,8 +120,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ban_duration?: string
           banned_at?: string
           banned_by?: string | null
+          expires_at?: string | null
           lift_reason?: string
           lifted_at?: string | null
           lifted_by?: string | null
@@ -129,8 +133,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ban_duration?: string
           banned_at?: string
           banned_by?: string | null
+          expires_at?: string | null
           lift_reason?: string
           lifted_at?: string | null
           lifted_by?: string | null
@@ -159,6 +165,7 @@ export type Database = {
       moderation_actions: {
         Row: {
           action: string
+          action_detail: string
           created_at: string
           id: number
           moderator_id: string | null
@@ -168,6 +175,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          action_detail?: string
           created_at?: string
           id?: never
           moderator_id?: string | null
@@ -177,6 +185,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          action_detail?: string
           created_at?: string
           id?: never
           moderator_id?: string | null
@@ -1003,17 +1012,25 @@ export type Database = {
         Returns: boolean
       }
       moderate_reported_account: {
-        Args: {
-          account_action: string
-          moderator_notes: string
-          target_report_id: string
-        }
+        Args:
+          | {
+              account_action: string
+              moderator_notes: string
+              target_report_id: string
+            }
+          | {
+              account_action: string
+              moderator_notes: string
+              requested_duration: string | null
+              target_report_id: string
+            }
         Returns: boolean
       }
       moderate_reported_content: {
         Args: { moderator_notes: string; target_report_id: string }
         Returns: boolean
       }
+      process_expired_moderation_bans: { Args: never; Returns: number }
       register_push_token: {
         Args: {
           device_identifier: string

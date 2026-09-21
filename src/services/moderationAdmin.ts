@@ -2,6 +2,7 @@ import { supabase } from '@/services/supabase';
 
 export type ModerationRole = 'moderator' | 'admin';
 export type ModerationStatus = 'open' | 'reviewing' | 'resolved' | 'dismissed';
+export type BanDuration = '1_day' | '1_week' | '1_month' | '1_year' | 'permanent';
 
 export type ModerationReport = {
   id: string;
@@ -113,12 +114,18 @@ export async function removeReportedContent(reportId: string, notes: string) {
   return error ? 'The reported content could not be removed. It may already be unavailable.' : null;
 }
 
-export async function moderateReportedAccount(reportId: string, action: 'ban' | 'unban', notes: string) {
+export async function moderateReportedAccount(
+  reportId: string,
+  action: 'ban' | 'unban',
+  notes: string,
+  duration: BanDuration = 'permanent',
+) {
   if (!supabase) return 'Moderation tools are not configured.';
   const { error } = await supabase.rpc('moderate_reported_account', {
     target_report_id: reportId,
     account_action: action,
     moderator_notes: notes.trim().slice(0, 2000),
+    requested_duration: action === 'ban' ? duration : null,
   });
   return error ? `The account could not be ${action === 'ban' ? 'banned' : 'restored'}. Refresh and try again.` : null;
 }

@@ -1,5 +1,5 @@
 begin;
-select plan(16);
+select plan(18);
 
 select ok((select bool_and(relrowsecurity) from pg_class where oid in (
   'public.reference_institutions'::regclass, 'public.reference_cities'::regclass,
@@ -52,10 +52,12 @@ update public.profiles set username = 'normalized_viewer', onboarding_completed 
 select set_config('request.jwt.claims', '{"sub":"72000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 set local role authenticated;
 select is((select current_city_geonames_id from public.get_profile_detail('71000000-0000-4000-8000-000000000001')), null::bigint, 'private location identity is hidden from profile details');
+select is((select current_city_geonames_id from public.discover_profiles() where id = '71000000-0000-4000-8000-000000000001'), null::bigint, 'private location identity is hidden from discovery');
 reset role;
 update public.profiles set show_current_location = true where id = '71000000-0000-4000-8000-000000000001';
 set local role authenticated;
 select is((select current_city_geonames_id from public.get_profile_detail('71000000-0000-4000-8000-000000000001')), 745044::bigint, 'visible location identity is returned by bounded profile details');
+select is((select current_city_geonames_id from public.discover_profiles() where id = '71000000-0000-4000-8000-000000000001'), 745044::bigint, 'visible location identity is returned by bounded discovery');
 reset role;
 
 select set_config('request.jwt.claims', '{"sub":"72000000-0000-4000-8000-000000000002","role":"service_role"}', true);

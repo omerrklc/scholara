@@ -18,6 +18,13 @@ export type ModerationReport = {
   communityPostId: string | null;
   communityCommentId: string | null;
   contentExcerpt: string;
+  reportedContentExists: boolean;
+  accountBanned: boolean;
+  targetReportCount30d: number;
+  targetDistinctReporters30d: number;
+  targetResolvedCount30d: number;
+  reporterReportCount30d: number;
+  reporterDismissedCount30d: number;
 };
 
 type ModerationReportRow = {
@@ -35,6 +42,13 @@ type ModerationReportRow = {
   community_post_id: string | null;
   community_comment_id: string | null;
   content_excerpt: string;
+  reported_content_exists: boolean;
+  account_banned: boolean;
+  target_report_count_30d: number | string;
+  target_distinct_reporters_30d: number | string;
+  target_resolved_count_30d: number | string;
+  reporter_report_count_30d: number | string;
+  reporter_dismissed_count_30d: number | string;
 };
 
 const isModerationRole = (value: unknown): value is ModerationRole => value === 'moderator' || value === 'admin';
@@ -69,6 +83,13 @@ export async function fetchModerationReports(status: ModerationStatus) {
       communityPostId: row.community_post_id,
       communityCommentId: row.community_comment_id,
       contentExcerpt: row.content_excerpt,
+      reportedContentExists: row.reported_content_exists,
+      accountBanned: row.account_banned,
+      targetReportCount30d: Number(row.target_report_count_30d) || 0,
+      targetDistinctReporters30d: Number(row.target_distinct_reporters_30d) || 0,
+      targetResolvedCount30d: Number(row.target_resolved_count_30d) || 0,
+      reporterReportCount30d: Number(row.reporter_report_count_30d) || 0,
+      reporterDismissedCount30d: Number(row.reporter_dismissed_count_30d) || 0,
     }));
   return { reports, error: null };
 }
@@ -83,3 +104,21 @@ export async function reviewModerationReport(reportId: string, status: Moderatio
   return error ? 'The report could not be updated. Refresh and try again.' : null;
 }
 
+export async function removeReportedContent(reportId: string, notes: string) {
+  if (!supabase) return 'Moderation tools are not configured.';
+  const { error } = await supabase.rpc('moderate_reported_content', {
+    target_report_id: reportId,
+    moderator_notes: notes.trim().slice(0, 2000),
+  });
+  return error ? 'The reported content could not be removed. It may already be unavailable.' : null;
+}
+
+export async function moderateReportedAccount(reportId: string, action: 'ban' | 'unban', notes: string) {
+  if (!supabase) return 'Moderation tools are not configured.';
+  const { error } = await supabase.rpc('moderate_reported_account', {
+    target_report_id: reportId,
+    account_action: action,
+    moderator_notes: notes.trim().slice(0, 2000),
+  });
+  return error ? `The account could not be ${action === 'ban' ? 'banned' : 'restored'}. Refresh and try again.` : null;
+}

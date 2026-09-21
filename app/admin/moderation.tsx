@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Chip, Field, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import {
   fetchModerationReports,
   fetchModerationRole,
+  moderateReportedAccount,
+  removeReportedContent,
   reviewModerationReport,
   type ModerationReport,
   type ModerationRole,
@@ -101,6 +103,43 @@ export default function ModerationScreen() {
     setError(result.error ?? '');
   };
 
+  const runEnforcement = async (report: ModerationReport, action: 'remove' | 'ban' | 'unban') => {
+    if (saving) return;
+    if (notes.trim().length < 5) {
+      setError('Write a decision note of at least 5 characters before taking this action.');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    setMessage('');
+    const actionError = action === 'remove'
+      ? await removeReportedContent(report.id, notes)
+      : await moderateReportedAccount(report.id, action, notes);
+    setSaving(false);
+    if (actionError) {
+      setError(actionError);
+      return;
+    }
+    setSelectedId('');
+    setNotes('');
+    setMessage(action === 'remove' ? 'The reported content was removed and the report was resolved.' : action === 'ban' ? 'The account was banned and the report was resolved.' : 'The account ban was lifted.');
+    const result = await fetchModerationReports(status);
+    setReports(result.reports);
+    setError(result.error ?? '');
+  };
+
+  const confirmEnforcement = (report: ModerationReport, action: 'remove' | 'ban' | 'unban') => {
+    const copy = action === 'remove'
+      ? { title: 'Remove reported content?', body: 'The post or reply will be permanently removed. The evidence snapshot and audit record will remain.', confirm: 'Remove content' }
+      : action === 'ban'
+        ? { title: 'Ban this account?', body: 'The account will be hidden and blocked from signing in or creating interactions. This can be reversed by an administrator.', confirm: 'Ban account' }
+        : { title: 'Restore this account?', body: 'The account will be allowed to sign in and participate again.', confirm: 'Lift ban' };
+    Alert.alert(copy.title, copy.body, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: copy.confirm, style: action === 'unban' ? 'default' : 'destructive', onPress: () => void runEnforcement(report, action) },
+    ]);
+  };
+
   if (!authReady) return <Screen scroll={false} style={styles.center}><ActivityIndicator color={colors.primary} /></Screen>;
   if (!session) return <Redirect href="/sign-in" />;
 
@@ -125,6 +164,7 @@ export default function ModerationScreen() {
       <View accessibilityRole="tablist" style={styles.filters}>{filters.map((filter) => <Chip key={filter.value} label={filter.label} selected={status === filter.value} onPress={() => { setSelectedId(''); setNotes(''); setStatus(filter.value); }} />)}</View>
       {reports.length === 0 ? <Card style={styles.center}><Ionicons name="checkmark-circle-outline" size={44} color={colors.primary} /><Text style={styles.emptyTitle}>No {status} reports</Text><Text style={styles.emptyText}>Nothing needs attention in this queue.</Text></Card> : reports.map((report) => {
         const selected = selectedId === report.id;
+        const decisionReady = notes.trim().length >= 5;
         return <Card key={report.id} style={styles.report}>
           <Pressable accessibilityRole="button" accessibilityState={{ expanded: selected }} onPress={() => selectReport(report)} style={styles.reportHeader}>
             <View style={styles.reportTitleWrap}>
@@ -138,11 +178,27 @@ export default function ModerationScreen() {
           {report.details ? <LabeledText label="REPORT DETAILS" text={report.details} /> : null}
           {report.contentExcerpt ? <LabeledText label="REPORTED CONTENT SNAPSHOT" text={report.contentExcerpt} /> : null}
           {selected ? <View style={styles.review}>
-            <Field label="Private review notes" multiline maxLength={2000} value={notes} onChangeText={setNotes} placeholder="Record the reason for this decision." />
-            <Text style={styles.counter}>{notes.length}/2000</Text>
+            <Card style={styles.evidenceCard}>
+              <View style={styles.evidenceTitle}><Ionicons name="analytics-outline" size={20} color={colors.primary} /><Text style={styles.evidenceHeading}>Evidence check</Text></View>
+              <EvidenceRow label="Reports about this account (30 days)" value={`${report.targetReportCount30d}`} />
+              <EvidenceRow label="Different reporters (30 days)" value={`${report.targetDistinctReporters30d}`} />
+              <EvidenceRow label="Previously resolved reports (30 days)" value={`${report.targetResolvedCount30d}`} />
+              <EvidenceRow label="Reports sent by this reporter (30 days)" value={`${report.reporterReportCount30d}`} />
+              <EvidenceRow label="This reporter's dismissed reports" value={`${report.reporterDismissedCount30d}`} />
+              <Text style={styles.guidance}>{report.source === 'chat'
+                ? 'No direct message evidence is attached. Do not ban from this report alone; keep reviewing or dismiss it.'
+                : report.targetDistinctReporters30d <= 1 && report.targetResolvedCount30d === 0
+                  ? 'This is a single-source report with no confirmed history. Verify the snapshot and details before taking action.'
+                  : 'Counts are context, not proof. Base the decision on the captured content and written report.'}</Text>
+            </Card>
+            <Field label="Private review notes" multiline maxLength={2000} value={notes} onChangeText={setNotes} placeholder="Record the evidence and reason for this decision." />
+            <Text style={styles.counter}>{notes.length}/2000 · at least 5 characters for a final action</Text>
             {report.status !== 'reviewing' ? <Button label={saving ? 'Saving…' : 'Start review'} variant="secondary" disabled={saving} onPress={() => void updateReport(report.id, 'reviewing')} /> : null}
-            {report.status !== 'resolved' ? <Button label={saving ? 'Saving…' : 'Resolve report'} disabled={saving} onPress={() => void updateReport(report.id, 'resolved')} /> : null}
-            {report.status !== 'dismissed' ? <Button label={saving ? 'Saving…' : 'Dismiss report'} variant="secondary" disabled={saving} onPress={() => void updateReport(report.id, 'dismissed')} /> : null}
+            {report.reportedContentExists ? <Button label={saving ? 'Saving…' : 'Remove reported content'} variant="danger" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'remove')} /> : null}
+            {role === 'admin' && report.reportedUserId && !report.accountBanned ? <Button label={saving ? 'Saving…' : 'Ban account'} variant="danger" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'ban')} /> : null}
+            {role === 'admin' && report.reportedUserId && report.accountBanned ? <Button label={saving ? 'Saving…' : 'Lift account ban'} variant="secondary" disabled={saving || !decisionReady} onPress={() => confirmEnforcement(report, 'unban')} /> : null}
+            {report.status !== 'resolved' ? <Button label={saving ? 'Saving…' : 'Resolve without enforcement'} disabled={saving || !decisionReady} onPress={() => void updateReport(report.id, 'resolved')} /> : null}
+            {report.status !== 'dismissed' ? <Button label={saving ? 'Saving…' : 'Dismiss as unsupported'} variant="secondary" disabled={saving || !decisionReady} onPress={() => void updateReport(report.id, 'dismissed')} /> : null}
           </View> : null}
         </Card>;
       })}
@@ -155,7 +211,10 @@ function LabeledText({ label, text }: { label: string; text: string }) {
   return <View style={styles.labeledText}><Text style={styles.label}>{label}</Text><Text style={styles.body}>{text}</Text></View>;
 }
 
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerTitle: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: '900', textAlign: 'center' }, headerSpacer: { width: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, roleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.primarySoft }, roleText: { color: colors.primaryDark, fontSize: 12, fontWeight: '800' }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, report: { gap: spacing.sm }, reportHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, reportTitleWrap: { flex: 1, minWidth: 0, gap: 2 }, reportName: { color: colors.ink, fontSize: 17, fontWeight: '900' }, username: { color: colors.primary, fontSize: 12, fontWeight: '700' }, meta: { color: colors.inkMuted, fontSize: 11 }, reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, labeledText: { gap: 4, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, label: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 }, body: { color: colors.ink, fontSize: 14, lineHeight: 20 }, review: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, counter: { alignSelf: 'flex-end', color: colors.inkMuted, fontSize: 10, marginTop: -spacing.xs }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '900', textAlign: 'center' }, emptyText: { color: colors.inkMuted, lineHeight: 20, textAlign: 'center' },
-});
+function EvidenceRow({ label, value }: { label: string; value: string }) {
+  return <View style={styles.evidenceRow}><Text style={styles.evidenceLabel}>{label}</Text><Text style={styles.evidenceValue}>{value}</Text></View>;
+}
 
+const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerTitle: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: '900', textAlign: 'center' }, headerSpacer: { width: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, roleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.primarySoft }, roleText: { color: colors.primaryDark, fontSize: 12, fontWeight: '800' }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, report: { gap: spacing.sm }, reportHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, reportTitleWrap: { flex: 1, minWidth: 0, gap: 2 }, reportName: { color: colors.ink, fontSize: 17, fontWeight: '900' }, username: { color: colors.primary, fontSize: 12, fontWeight: '700' }, meta: { color: colors.inkMuted, fontSize: 11 }, reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, labeledText: { gap: 4, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, label: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 }, body: { color: colors.ink, fontSize: 14, lineHeight: 20 }, review: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, evidenceCard: { gap: spacing.xs, backgroundColor: colors.surfaceMuted, shadowOpacity: 0, elevation: 0 }, evidenceTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xs }, evidenceHeading: { color: colors.ink, fontWeight: '900' }, evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, evidenceLabel: { flex: 1, minWidth: 0, color: colors.inkMuted, fontSize: 12 }, evidenceValue: { color: colors.ink, fontWeight: '900' }, guidance: { color: colors.primaryDark, fontSize: 12, lineHeight: 18, fontWeight: '700', paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, counter: { alignSelf: 'flex-end', color: colors.inkMuted, fontSize: 10, marginTop: -spacing.xs, textAlign: 'right' }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '900', textAlign: 'center' }, emptyText: { color: colors.inkMuted, lineHeight: 20, textAlign: 'center' },
+});

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Button, Card, Chip, Field, MessageBanner } from '@/components/ui';
@@ -67,6 +67,8 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<CommunityComment | null>(null);
   const [safetyTarget, setSafetyTarget] = useState<CommunityComment | null>(null);
+  const commentsScrollRef = useRef<ScrollView>(null);
+  const revealNewestComment = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -94,10 +96,13 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
     setError('');
     const result = await createCommunityComment(post.id, draft);
     setBusy(false);
-    if (result) setError(result);
+    if (result.error) setError(result.error);
     else {
       setDraft('');
+      Keyboard.dismiss();
       await load();
+      revealNewestComment.current = true;
+      requestAnimationFrame(() => commentsScrollRef.current?.scrollToEnd({ animated: true }));
       onChanged();
     }
   };
@@ -119,7 +124,17 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.flex}>
         <ModalHeader title="Discussion" onClose={onClose} />
-        <ScrollView contentContainerStyle={styles.commentsContent} keyboardShouldPersistTaps="handled" style={styles.commentsScroll}>
+        <ScrollView
+          contentContainerStyle={styles.commentsContent}
+          keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => {
+            if (!revealNewestComment.current) return;
+            revealNewestComment.current = false;
+            commentsScrollRef.current?.scrollToEnd({ animated: true });
+          }}
+          ref={commentsScrollRef}
+          style={styles.commentsScroll}
+        >
           <Card style={styles.postSummary}><Text style={styles.summaryAuthor}>{post.authorName}</Text><Text style={styles.summaryBody}>{post.body}</Text></Card>
           {error ? <MessageBanner message={error} /> : null}
           {loading ? <ActivityIndicator color={colors.primary} /> : null}

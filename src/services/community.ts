@@ -94,13 +94,14 @@ export async function fetchCommunityComments(postId: string) {
 }
 
 export async function createCommunityComment(postId: string, body: string) {
-  if (!supabase) return 'Community is not configured.';
+  if (!supabase) return { id: null, error: 'Community is not configured.' };
   const cleanBody = normalizeCommunityComment(body);
-  if (!cleanBody) return 'Write a comment first.';
-  const { error } = await supabase.rpc('create_community_comment', { target_post_id: postId, comment_body: cleanBody });
-  if (!error) return null;
-  if (error.message.toLowerCase().includes('rate limit')) return 'You are commenting too quickly. Please wait a moment.';
-  return 'Your comment could not be published.';
+  if (!cleanBody) return { id: null, error: 'Write a comment first.' };
+  const { data, error } = await supabase.rpc('create_community_comment', { target_post_id: postId, comment_body: cleanBody });
+  if (!error) return { id: data, error: null };
+  if (error.message.toLowerCase().includes('rate limit')) return { id: null, error: 'You are commenting too quickly. Please wait a moment.' };
+  if (error.message.toLowerCase().includes('restricted')) return { id: null, error: 'This account is restricted from posting.' };
+  return { id: null, error: 'Your comment could not be published.' };
 }
 
 export async function deleteCommunityComment(commentId: string) {

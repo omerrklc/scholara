@@ -105,6 +105,95 @@ export type Database = {
           },
         ]
       }
+      moderation_account_bans: {
+        Row: {
+          banned_at: string
+          banned_by: string | null
+          lift_reason: string
+          lifted_at: string | null
+          lifted_by: string | null
+          previous_onboarding_completed: boolean
+          reason: string
+          source_report_id: string | null
+          user_id: string
+        }
+        Insert: {
+          banned_at?: string
+          banned_by?: string | null
+          lift_reason?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          previous_onboarding_completed?: boolean
+          reason: string
+          source_report_id?: string | null
+          user_id: string
+        }
+        Update: {
+          banned_at?: string
+          banned_by?: string | null
+          lift_reason?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          previous_onboarding_completed?: boolean
+          reason?: string
+          source_report_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_account_bans_source_report_id_fkey"
+            columns: ["source_report_id"]
+            isOneToOne: false
+            referencedRelation: "user_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_account_bans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: number
+          moderator_id: string | null
+          notes: string
+          report_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: never
+          moderator_id?: string | null
+          notes: string
+          report_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: never
+          moderator_id?: string | null
+          notes?: string
+          report_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "user_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_roles: {
         Row: {
           created_at: string
@@ -787,6 +876,7 @@ export type Database = {
       get_moderation_reports: {
         Args: { page_size?: number; status_filter?: string }
         Returns: {
+          account_banned: boolean
           community_comment_id: string | null
           community_post_id: string | null
           content_excerpt: string
@@ -795,12 +885,18 @@ export type Database = {
           reasons: string[]
           report_id: string
           report_status: string
+          reported_content_exists: boolean
           reported_name: string
           reported_user_id: string | null
           reported_username: string
+          reporter_dismissed_count_30d: number
+          reporter_report_count_30d: number
           review_notes: string
           reviewed_at: string | null
           source: string
+          target_distinct_reporters_30d: number
+          target_report_count_30d: number
+          target_resolved_count_30d: number
         }[]
       }
       get_my_moderation_role: { Args: never; Returns: string | null }
@@ -904,6 +1000,18 @@ export type Database = {
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_notification_read: {
         Args: { target_notification_id: string }
+        Returns: boolean
+      }
+      moderate_reported_account: {
+        Args: {
+          account_action: string
+          moderator_notes: string
+          target_report_id: string
+        }
+        Returns: boolean
+      }
+      moderate_reported_content: {
+        Args: { moderator_notes: string; target_report_id: string }
         Returns: boolean
       }
       register_push_token: {

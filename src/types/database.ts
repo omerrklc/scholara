@@ -67,6 +67,68 @@ export type Database = {
           },
         ]
       }
+      moderation_audit_log: {
+        Row: {
+          created_at: string
+          id: number
+          moderator_id: string | null
+          new_status: string
+          notes: string
+          previous_status: string
+          report_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          moderator_id?: string | null
+          new_status: string
+          notes?: string
+          previous_status: string
+          report_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          moderator_id?: string | null
+          new_status?: string
+          notes?: string
+          previous_status?: string
+          report_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_audit_log_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "user_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_comments: {
         Row: {
           author_id: string
@@ -539,6 +601,7 @@ export type Database = {
         Row: {
           community_comment_id: string | null
           community_post_id: string | null
+          content_excerpt: string
           created_at: string
           details: string
           id: string
@@ -546,13 +609,17 @@ export type Database = {
           reasons: string[]
           reported_user_id: string | null
           reporter_id: string | null
+          review_notes: string
           reviewed_at: string | null
+          reviewed_by: string | null
           source: string
           status: string
+          updated_at: string
         }
         Insert: {
           community_comment_id?: string | null
           community_post_id?: string | null
+          content_excerpt?: string
           created_at?: string
           details?: string
           id?: string
@@ -560,13 +627,17 @@ export type Database = {
           reasons: string[]
           reported_user_id?: string | null
           reporter_id?: string | null
+          review_notes?: string
           reviewed_at?: string | null
+          reviewed_by?: string | null
           source: string
           status?: string
+          updated_at?: string
         }
         Update: {
           community_comment_id?: string | null
           community_post_id?: string | null
+          content_excerpt?: string
           created_at?: string
           details?: string
           id?: string
@@ -574,9 +645,12 @@ export type Database = {
           reasons?: string[]
           reported_user_id?: string | null
           reporter_id?: string | null
+          review_notes?: string
           reviewed_at?: string | null
+          reviewed_by?: string | null
           source?: string
           status?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -710,6 +784,26 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_moderation_reports: {
+        Args: { page_size?: number; status_filter?: string }
+        Returns: {
+          community_comment_id: string | null
+          community_post_id: string | null
+          content_excerpt: string
+          created_at: string
+          details: string
+          reasons: string[]
+          report_id: string
+          report_status: string
+          reported_name: string
+          reported_user_id: string | null
+          reported_username: string
+          review_notes: string
+          reviewed_at: string | null
+          source: string
+        }[]
+      }
+      get_my_moderation_role: { Args: never; Returns: string | null }
       get_community_comments: {
         Args: {
           before_time?: string
@@ -855,6 +949,14 @@ export type Database = {
             }
             Returns: string
           }
+      review_moderation_report: {
+        Args: {
+          moderator_notes?: string
+          next_status: string
+          target_report_id: string
+        }
+        Returns: boolean
+      }
       request_connection: { Args: { target_user_id: string }; Returns: string }
       request_data_export: { Args: never; Returns: string }
       send_message: {

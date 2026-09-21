@@ -5,6 +5,7 @@ import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { Button, Card, Chip, MessageBanner, Screen } from '@/components/ui';
 import { NotificationBell } from '@/components/NotificationBell';
 import { fetchBlockedUsers, unblockUser, type BlockedUser } from '@/services/moderation';
+import { fetchModerationRole, type ModerationRole } from '@/services/moderationAdmin';
 import { createProfilePhotoUrl } from '@/services/profilePhotos';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
@@ -16,6 +17,7 @@ export default function ProfileScreen() {
   const [blockedError, setBlockedError] = useState('');
   const [unblockingId, setUnblockingId] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [moderationRole, setModerationRole] = useState<ModerationRole | null>(null);
 
   const loadBlockedUsers = useCallback(async () => {
     if (!session) return;
@@ -28,6 +30,15 @@ export default function ProfileScreen() {
   }, [session]);
 
   useFocusEffect(useCallback(() => { void loadBlockedUsers(); }, [loadBlockedUsers]));
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    if (!session) {
+      setModerationRole(null);
+      return;
+    }
+    void fetchModerationRole().then((result) => { if (active) setModerationRole(result.role); });
+    return () => { active = false; };
+  }, [session]));
   useFocusEffect(useCallback(() => {
     let active = true;
     void createProfilePhotoUrl(profile.avatarPath).then((url) => { if (active) setAvatarUrl(url); });
@@ -65,6 +76,7 @@ export default function ProfileScreen() {
     </Card>
     <Button label="Edit profile" variant="secondary" onPress={() => router.push('/onboarding')} />
     <Button label="Account & privacy settings" variant="secondary" icon={<Ionicons name="settings-outline" size={20} color={colors.ink} />} onPress={() => router.push('/settings' as Href)} />
+    {moderationRole ? <Button label="Moderation dashboard" variant="secondary" icon={<Ionicons name="shield-checkmark-outline" size={20} color={colors.ink} />} onPress={() => router.push('/admin/moderation' as Href)} /> : null}
     {session ? <Button label="Sign out" variant="ghost" onPress={() => void logOut()} /> : null}
   </Screen>;
 }

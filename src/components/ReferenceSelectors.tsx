@@ -32,9 +32,9 @@ export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
   const request = useRef(0);
 
   useEffect(() => {
+    const sequence = ++request.current;
     const trimmed = query.trim();
     if (value?.name === trimmed || trimmed.length < 2) return;
-    const sequence = ++request.current;
     const timer = setTimeout(() => {
       setLoading(true); setError('');
       void searchInstitutions(trimmed, countryCode).then((result) => {
@@ -42,16 +42,19 @@ export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
         setResults(result.results); setError(result.error ?? ''); setLoading(false);
       });
     }, 400);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (request.current === sequence) request.current += 1;
+    };
   }, [countryCode, query, value?.name]);
 
   return <View style={styles.wrap}>
-    <Field label="Institution or research organization" autoCorrect={false} value={query} placeholder="Start typing the official name" onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) setResults([]); if (value && text !== value.name) onClear(); }} />
+    <Field label="Institution or research organization" autoCorrect={false} maxLength={100} value={query} placeholder="Start typing the official name" onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) { setLoading(false); setResults([]); } if (value && text !== value.name) onClear(); }} />
     {loading ? <ActivityIndicator accessibilityLabel="Searching institutions" color={colors.primary} /> : null}
     {error ? <MessageBanner message={error} /> : null}
     {!loading && query.trim().length >= 2 && !value && !error && results.length === 0 ? <Text style={styles.empty}>No verified organizations found. Try another spelling or use the unlisted option.</Text> : null}
     {results.length ? <View accessibilityRole="list" style={styles.results}>{results.map((item) => <Result
-      key={item.id} title={item.name} subtitle={[item.city, item.countryName].filter(Boolean).join(', ')} onPress={() => { onSelect(item); setQuery(item.name); setResults([]); }}
+      key={item.id} title={item.name} subtitle={[item.city, item.countryName].filter(Boolean).join(', ')} onPress={() => { request.current += 1; setLoading(false); onSelect(item); setQuery(item.name); setResults([]); }}
     />)}</View> : null}
     {value ? <Text style={styles.verified}>Verified organization · ROR</Text> : null}
   </View>;
@@ -67,9 +70,9 @@ export function CitySelect({ label, value, countryCode, onSelect, onClear }: {
   const request = useRef(0);
 
   useEffect(() => {
+    const sequence = ++request.current;
     const trimmed = query.trim();
     if (!countryCode || value?.name === trimmed || trimmed.length < 2) return;
-    const sequence = ++request.current;
     const timer = setTimeout(() => {
       setLoading(true); setError('');
       void searchCities(trimmed, countryCode).then((result) => {
@@ -77,15 +80,18 @@ export function CitySelect({ label, value, countryCode, onSelect, onClear }: {
         setResults(result.results); setError(result.error ?? ''); setLoading(false);
       });
     }, 400);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (request.current === sequence) request.current += 1;
+    };
   }, [countryCode, query, value?.name]);
 
   return <View style={styles.wrap}>
-    <Field label={label} editable={Boolean(countryCode)} autoCorrect={false} value={query} placeholder={countryCode ? 'Search city' : 'Choose a country first'} onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) setResults([]); if (value && text !== value.name) onClear(); }} />
+    <Field label={label} editable={Boolean(countryCode)} autoCorrect={false} maxLength={100} value={query} placeholder={countryCode ? 'Search city' : 'Choose a country first'} onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) { setLoading(false); setResults([]); } if (value && text !== value.name) onClear(); }} />
     {loading ? <ActivityIndicator accessibilityLabel="Searching cities" color={colors.primary} /> : null}
     {error ? <MessageBanner message={error} /> : null}
     {!loading && query.trim().length >= 2 && !value && !error && results.length === 0 ? <Text style={styles.empty}>No city found in the selected country.</Text> : null}
-    {results.length ? <View accessibilityRole="list" style={styles.results}>{results.map((item) => <Result key={item.id} title={item.name} subtitle={[item.admin1, item.countryName].filter(Boolean).join(', ')} onPress={() => { onSelect(item); setQuery(item.name); setResults([]); }} />)}</View> : null}
+    {results.length ? <View accessibilityRole="list" style={styles.results}>{results.map((item) => <Result key={item.id} title={item.name} subtitle={[item.admin1, item.countryName].filter(Boolean).join(', ')} onPress={() => { request.current += 1; setLoading(false); onSelect(item); setQuery(item.name); setResults([]); }} />)}</View> : null}
     {value ? <Text style={styles.verified}>Verified city · GeoNames</Text> : null}
   </View>;
 }

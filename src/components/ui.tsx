@@ -37,7 +37,7 @@ export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<
 
 export function Chip({ label, selected = false, onPress }: { label: string; selected?: boolean; onPress?: () => void }) {
   const content = <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{label}</Text>;
-  return onPress ? <Pressable onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>{content}</Pressable> : <View style={[styles.chip, selected && styles.chipSelected]}>{content}</View>;
+  return onPress ? <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>{content}</Pressable> : <View style={[styles.chip, selected && styles.chipSelected]}>{content}</View>;
 }
 
 export function Field({ label, multiline = false, accessory, ...props }: TextInputProps & { label: string; accessory?: ReactNode }) {
@@ -68,7 +68,7 @@ export function PasswordField(props: Omit<TextInputProps, 'secureTextEntry'> & {
 }
 
 export function SegmentedControl<T extends string>({ value, options, onChange }: { value: T; options: { label: string; value: T }[]; onChange: (value: T) => void }) {
-  return <View style={styles.segment}>{options.map((option) => <Pressable key={option.value} onPress={() => onChange(option.value)} style={[styles.segmentItem, value === option.value && styles.segmentActive]}><Text style={[styles.segmentText, value === option.value && styles.segmentTextActive]}>{option.label}</Text></Pressable>)}</View>;
+  return <View accessibilityRole="tablist" style={styles.segment}>{options.map((option) => <Pressable accessibilityRole="tab" accessibilityState={{ selected: value === option.value }} key={option.value} onPress={() => onChange(option.value)} style={[styles.segmentItem, value === option.value && styles.segmentActive]}><Text style={[styles.segmentText, value === option.value && styles.segmentTextActive]}>{option.label}</Text></Pressable>)}</View>;
 }
 
 export function SectionTitle({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {

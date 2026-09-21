@@ -21,8 +21,8 @@ export function ResearcherCard({ person, saved, connectionState, saving = false,
     <View style={styles.matchReason}><Text style={styles.reasonLabel}>WHY YOU MATCH</Text><Text style={styles.reason}>{person.reason}</Text></View>
     <Text style={styles.intent}>{person.intent}</Text>
     <View style={styles.actions}>
-      <Pressable accessibilityLabel="Pass" onPress={onPass} style={styles.roundButton}><Ionicons name="close" size={24} color={colors.inkMuted} /></Pressable>
-      <Pressable accessibilityLabel={saved ? 'Remove saved profile' : 'Save profile'} disabled={saving} onPress={onSave} style={[styles.roundButton, saved && styles.saved, saving && styles.busy]}><Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={22} color={saved ? colors.primary : colors.inkMuted} /></Pressable>
+      <Pressable accessibilityLabel="Pass" accessibilityRole="button" onPress={onPass} style={styles.roundButton}><Ionicons name="close" size={24} color={colors.inkMuted} /></Pressable>
+      <Pressable accessibilityLabel={saved ? 'Remove saved profile' : 'Save profile'} accessibilityRole="button" accessibilityState={{ disabled: saving, selected: saved }} disabled={saving} onPress={onSave} style={[styles.roundButton, saved && styles.saved, saving && styles.busy]}><Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={22} color={saved ? colors.primary : colors.inkMuted} /></Pressable>
       <View style={styles.connect}><Button label={connectLabel} disabled={connectDisabled} onPress={onConnect} /></View>
     </View>
   </Card>;

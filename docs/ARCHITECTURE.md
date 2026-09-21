@@ -20,6 +20,8 @@ The mobile bundle is public and untrusted. It may contain only the Supabase URL 
 
 The `profiles` table is owner-readable. Discovery is exposed through a bounded RPC that returns only approved fields and applies visibility and blocking rules before data leaves the database. Messages are readable only by matched, unblocked participants. Reports are write-only from the mobile user's perspective.
 
+Institution and city search crosses a separate trusted boundary. The authenticated Edge Function calls only allowlisted ROR/Open-Meteo endpoints, rate-limits users, caches validated results, and writes private canonical reference tables with the service role. A security-definer trigger canonicalizes normalized profile labels. The app cannot create reference identities, and public profile RPCs hide normalized location identifiers with their labels when visibility is disabled.
+
 ## Change rules
 
 1. Add schema changes as uniquely versioned migrations.
@@ -31,5 +33,4 @@ The `profiles` table is owner-readable. Discovery is exposed through a bounded R
 
 ## Near-term evolution
 
-The current modular Expo + Supabase architecture remains appropriate. Trusted background work—push notification fan-out, external ORCID/ROR/OpenAlex integrations, exports, deletion jobs, and moderator actions—will later live in Supabase Edge Functions or another trusted server boundary. A separate protected web console will serve moderation operations.
-
+The current modular Expo + Supabase architecture remains appropriate. ROR and city reference search plus push notification processing already live in Supabase Edge Functions. Other trusted background work—external ORCID/OpenAlex integrations, exports, deletion jobs, and moderator actions—will use the same server boundary. A separate protected web console will serve moderation operations.

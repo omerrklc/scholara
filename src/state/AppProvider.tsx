@@ -9,9 +9,9 @@ import { isSupabaseConfigured, supabase } from '@/services/supabase';
 import type { Profile } from '@/types/domain';
 
 const initialProfile: Profile = {
-  fullName: '', username: '', avatarPath: '', academicStage: '', university: '', department: '', program: '',
-  researchDescription: '', researchInterests: [], intents: [], currentCity: '', currentCountry: '', showCurrentLocation: false,
-  isRelocating: false, destinationCity: '', destinationCountry: '', relocationDate: '', showRelocationDestination: false, showRelocationDate: false,
+  normalizationVersion: 0, fullName: '', username: '', avatarPath: '', academicStage: '', university: '', universityRorId: '', universityCountryCode: '', department: '', program: '',
+  researchDescription: '', researchInterests: [], intents: [], currentCity: '', currentCountry: '', currentCityGeonamesId: '', currentCountryCode: '', showCurrentLocation: false,
+  isRelocating: false, destinationCity: '', destinationCountry: '', destinationCityGeonamesId: '', destinationCountryCode: '', relocationDate: '', showRelocationDestination: false, showRelocationDate: false,
   languages: [{ name: 'English', proficiency: 'Fluent' }],
 };
 

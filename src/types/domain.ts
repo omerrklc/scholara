@@ -4,11 +4,14 @@ export type DiscoveryMode = 'research' | 'moving';
 export type Language = { name: string; proficiency: string };
 
 export type Profile = {
+  normalizationVersion: 0 | 1;
   fullName: string;
   username: string;
   avatarPath: string;
   academicStage: AcademicStage | '';
   university: string;
+  universityRorId: string;
+  universityCountryCode: string;
   department: string;
   program: string;
   researchDescription: string;
@@ -16,10 +19,14 @@ export type Profile = {
   intents: string[];
   currentCity: string;
   currentCountry: string;
+  currentCityGeonamesId: string;
+  currentCountryCode: string;
   showCurrentLocation: boolean;
   isRelocating: boolean;
   destinationCity: string;
   destinationCountry: string;
+  destinationCityGeonamesId: string;
+  destinationCountryCode: string;
   relocationDate: string;
   showRelocationDestination: boolean;
   showRelocationDate: boolean;

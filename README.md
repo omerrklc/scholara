@@ -6,6 +6,7 @@ Scholara is a mobile academic network for early-career researchers. Its product 
 
 - Supabase email/password authentication, PKCE verification callback, password reset, secure session persistence, and sign-out
 - Eight-step academic onboarding and owner-protected profile persistence
+- Global country, ROR institution, and GeoNames city identities with legacy-safe profile review
 - Research and Moving discovery with transparent compatibility reasons and privacy-controlled location fields
 - Saved profiles, connection requests, and mutual matches
 - Private realtime messaging restricted to matched, unblocked participants
@@ -17,7 +18,7 @@ Scholara is a mobile academic network for early-career researchers. Its product 
 - Server-side validation, bounded queries, rate limits, RLS, and database security tests
 - Keyboard-aware responsive layouts tested on small mobile viewports
 
-This is a functional alpha, not a production release. Global institution/location normalization, localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. The pre-release legal text requires professional review before public launch.
+This is a functional alpha, not a production release. Localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. Commercial city search still requires a paid or self-hosted geocoding provider, and the pre-release legal text requires professional review before public launch.
 
 ## Run the app
 
@@ -58,5 +59,6 @@ Early SQL was applied manually, so remote migration history must be reconciled b
 - [Phase 0 assessment and next gate](docs/PHASE_0_ASSESSMENT.md)
 - [Supabase security setup](SECURITY_SETUP.md)
 - [Native push notification delivery](docs/PUSH_NOTIFICATIONS.md)
+- [Global institution and location references](docs/GLOBAL_REFERENCES.md)
 
 Authentication redirect URLs must include the exact callback for the active build. Production will move from the development custom scheme to verified iOS Universal Links and Android App Links before public distribution.

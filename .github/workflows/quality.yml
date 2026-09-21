@@ -34,6 +34,7 @@ jobs:
       - run: pnpm verify
       - run: deno check supabase/functions/send-push-notification/index.ts
       - run: deno check supabase/functions/process-push-receipts/index.ts
+      - run: deno check supabase/functions/search-reference-data/index.ts
 
   database:
     name: Database migrations and RLS tests

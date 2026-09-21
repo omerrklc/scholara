@@ -379,16 +379,23 @@ export type Database = {
           avatar_path: string
           created_at: string
           current_city: string
+          current_city_geonames_id: number | null
           current_country: string
+          current_country_code: string | null
           department: string
           destination_city: string
+          destination_city_geonames_id: number | null
           destination_country: string
+          destination_country_code: string | null
           full_name: string
           id: string
           intents: string[]
           is_relocating: boolean
+          institution_country_code: string | null
+          institution_ror_id: string | null
           languages: Json
           onboarding_completed: boolean
+          normalization_version: number
           program: string
           relocation_date: string
           research_description: string
@@ -405,16 +412,23 @@ export type Database = {
           avatar_path?: string
           created_at?: string
           current_city?: string
+          current_city_geonames_id?: number | null
           current_country?: string
+          current_country_code?: string | null
           department?: string
           destination_city?: string
+          destination_city_geonames_id?: number | null
           destination_country?: string
+          destination_country_code?: string | null
           full_name?: string
           id: string
           intents?: string[]
           is_relocating?: boolean
+          institution_country_code?: string | null
+          institution_ror_id?: string | null
           languages?: Json
           onboarding_completed?: boolean
+          normalization_version?: number
           program?: string
           relocation_date?: string
           research_description?: string
@@ -431,16 +445,23 @@ export type Database = {
           avatar_path?: string
           created_at?: string
           current_city?: string
+          current_city_geonames_id?: number | null
           current_country?: string
+          current_country_code?: string | null
           department?: string
           destination_city?: string
+          destination_city_geonames_id?: number | null
           destination_country?: string
+          destination_country_code?: string | null
           full_name?: string
           id?: string
           intents?: string[]
           is_relocating?: boolean
+          institution_country_code?: string | null
+          institution_ror_id?: string | null
           languages?: Json
           onboarding_completed?: boolean
+          normalization_version?: number
           program?: string
           relocation_date?: string
           research_description?: string
@@ -622,14 +643,20 @@ export type Database = {
           academic_stage: string
           avatar_path: string
           current_city: string
+          current_city_geonames_id: number | null
           current_country: string
+          current_country_code: string | null
           department: string
           destination_city: string
+          destination_city_geonames_id: number | null
           destination_country: string
+          destination_country_code: string | null
           full_name: string
           id: string
           intents: string[]
           is_relocating: boolean
+          institution_country_code: string | null
+          institution_ror_id: string | null
           program: string
           relocation_date: string
           research_description: string
@@ -649,14 +676,20 @@ export type Database = {
           avatar_path: string
           connection_state: string
           current_city: string
+          current_city_geonames_id: number | null
           current_country: string
+          current_country_code: string | null
           department: string
           destination_city: string
+          destination_city_geonames_id: number | null
           destination_country: string
+          destination_country_code: string | null
           full_name: string
           id: string
           intents: string[]
           is_relocating: boolean
+          institution_country_code: string | null
+          institution_ror_id: string | null
           languages: Json
           program: string
           relocation_date: string

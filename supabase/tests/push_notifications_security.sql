@@ -1,5 +1,5 @@
 begin;
-select plan(16);
+select plan(22);
 
 select ok(
   (select relrowsecurity from pg_class where oid = 'public.push_tokens'::regclass),
@@ -75,6 +75,35 @@ select ok(public.unregister_push_token('device-identifier-0002'), 'owner can unr
 reset role;
 select is((select count(*)::integer from public.push_tokens), 1, 'only the first user token remains');
 select is((select count(*)::integer from public.push_deliveries), 0, 'clients cannot forge delivery records');
+
+select ok(
+  not has_function_privilege('authenticated', 'public.claim_pending_push_receipts(integer)', 'EXECUTE'),
+  'authenticated users cannot claim push receipts'
+);
+select ok(
+  not has_function_privilege('authenticated', 'public.cleanup_old_push_deliveries(integer)', 'EXECUTE'),
+  'authenticated users cannot delete delivery history'
+);
+select throws_ok(
+  $$select * from public.claim_pending_push_receipts(100)$$,
+  '42501', 'Service role required', 'receipt claiming also checks the caller role'
+);
+select throws_ok(
+  $$select public.cleanup_old_push_deliveries(500)$$,
+  '42501', 'Service role required', 'delivery cleanup also checks the caller role'
+);
+
+reset role;
+select throws_ok(
+  $$select * from public.claim_pending_push_receipts(0)$$,
+  '42501', 'Service role required', 'non-service database sessions cannot bypass receipt authorization'
+);
+select ok(
+  (select count(*) = 4 from information_schema.columns
+   where table_schema = 'public' and table_name = 'push_deliveries'
+     and column_name in ('receipt_status', 'receipt_attempts', 'receipt_checked_at', 'next_receipt_check_at')),
+  'receipt state is persisted in bounded delivery columns'
+);
 
 select * from finish();
 rollback;

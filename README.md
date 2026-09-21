@@ -17,7 +17,7 @@ Scholara is a mobile academic network for early-career researchers. Its product 
 - Server-side validation, bounded queries, rate limits, RLS, and database security tests
 - Keyboard-aware responsive layouts tested on small mobile viewports
 
-This is a functional alpha, not a production release. Global institution/location normalization, push receipt processing, localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. The pre-release legal text requires professional review before public launch.
+This is a functional alpha, not a production release. Global institution/location normalization, localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. The pre-release legal text requires professional review before public launch.
 
 ## Run the app
 

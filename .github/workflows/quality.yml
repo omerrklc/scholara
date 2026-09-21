@@ -33,6 +33,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
       - run: deno check supabase/functions/send-push-notification/index.ts
+      - run: deno check supabase/functions/process-push-receipts/index.ts
 
   database:
     name: Database migrations and RLS tests

@@ -20,7 +20,7 @@ Perform these steps on a non-production Supabase project first.
 1. Apply `202609140001_push_notifications.sql` after reconciling remote migration history.
 2. Generate a random secret of at least 32 bytes and store it as the Edge Function secret `PUSH_WEBHOOK_SECRET`.
 3. Deploy `send-push-notification` with JWT verification disabled. The function still requires the custom webhook secret and rejects every request without it.
-4. In **Database → Webhooks**, create one webhook:
+4. In **Integrations → Database Webhooks → Webhooks**, create one webhook:
    - Table: `public.notifications`
    - Event: `INSERT`
    - Method: `POST`
@@ -29,9 +29,10 @@ Perform these steps on a non-production Supabase project first.
 5. Keep the existing FCM V1 credential assigned to `com.scholara.app` in Expo/EAS.
 6. Open **Settings → Notifications** in the installed development build and enable phone notifications.
 
+For receipt processing, also apply `202609150001_push_receipts.sql`, deploy `process-push-receipts` with JWT verification disabled, and store a separate random secret as `PUSH_RECEIPT_SECRET`. In Supabase Cron, schedule a `POST` request every five minutes to `https://<project-ref>.supabase.co/functions/v1/process-push-receipts` with `x-scholara-receipt-secret: <the same receipt secret>`. Do not reuse a mobile API key or expose either server secret to the app.
+
 Do not paste the webhook secret, service-role key, or Firebase service-account JSON into source control, SQL migrations, `EXPO_PUBLIC_` variables, screenshots, or support messages.
 
 ## Operational follow-up
 
-Expo push tickets only confirm acceptance by Expo. A scheduled receipt worker should query receipts after roughly 15 minutes, retain bounded delivery metrics, retry transient failures with backoff, and remove tokens reported as `DeviceNotRegistered`. This is required before a large public rollout.
-
+Expo push tickets only confirm acceptance by Expo. The `process-push-receipts` worker checks tickets after at least five minutes, retries missing receipts with exponential backoff, removes tokens reported as `DeviceNotRegistered`, and bounds delivery history to 30 days. Configure Supabase Cron to invoke it every five minutes with `x-scholara-receipt-secret`; the value must match the server-only `PUSH_RECEIPT_SECRET` Edge Function secret. Receipt status means the platform push service accepted or rejected the message, not that a person opened it.

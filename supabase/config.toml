@@ -48,3 +48,6 @@ enabled = false
 
 [functions.send-push-notification]
 verify_jwt = false
+
+[functions.process-push-receipts]
+verify_jwt = false

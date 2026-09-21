@@ -779,6 +779,14 @@ export type Database = {
         Args: { target_notification_id: string }
         Returns: boolean
       }
+      register_push_token: {
+        Args: {
+          device_identifier: string
+          device_platform: string
+          push_token: string
+        }
+        Returns: boolean
+      }
       report_community_comment: {
         Args: {
           report_details?: string
@@ -825,6 +833,10 @@ export type Database = {
         Returns: boolean
       }
       unblock_user: { Args: { target_user_id: string }; Returns: boolean }
+      unregister_push_token: {
+        Args: { device_identifier: string }
+        Returns: boolean
+      }
       update_notification_preferences: {
         Args: {
           community_enabled: boolean

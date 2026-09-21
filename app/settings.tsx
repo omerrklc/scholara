@@ -8,6 +8,7 @@ import {
   permanentlyDeleteAccount, updateNotificationPreferences, updatePrivacyPreferences,
   type LegalDocumentKey, type NotificationPreferences,
 } from '@/services/accountSettings';
+import { openNotificationSettings } from '@/services/pushNotifications';
 import { useApp } from '@/state/AppProvider';
 import { colors, radius, spacing } from '@/theme/tokens';
 
@@ -16,7 +17,7 @@ const legalLabels: Record<LegalDocumentKey, string> = {
 };
 
 export default function SettingsScreen() {
-  const { profile, session, updateProfile } = useApp();
+  const { enablePushNotifications, profile, pushRegistrationState, session, updateProfile } = useApp();
   const [notifications, setNotifications] = useState(defaultAccountSettings.notifications);
   const [privacy, setPrivacy] = useState(defaultAccountSettings.privacy);
   const [legal, setLegal] = useState(defaultAccountSettings.legal);
@@ -53,6 +54,14 @@ export default function SettingsScreen() {
       showRelocationDestination: privacy.relocationDestination, showRelocationDate: privacy.relocationDate });
     setSaving(''); setMessage({ text: error ?? 'Privacy preferences saved.', error: Boolean(error) });
   };
+  const enableDeviceNotifications = async () => {
+    setMessage(null);
+    const state = await enablePushNotifications();
+    if (state === 'registered') setMessage({ text: 'Device notifications are active.' });
+    else if (state === 'denied') setMessage({ text: 'Notification permission is blocked. Enable it in your phone settings.', error: true });
+    else if (state === 'unsupported') setMessage({ text: 'Push notifications require the installed Scholara app on a physical phone.', error: true });
+    else setMessage({ text: 'Device notifications could not be enabled. Please try again.', error: true });
+  };
   const acceptLegal = async () => {
     setSaving('legal'); setMessage(null);
     const error = await acceptCurrentLegalDocuments();
@@ -86,6 +95,12 @@ export default function SettingsScreen() {
         </SettingsCard>
 
         <SettingsCard title="NOTIFICATIONS" icon="notifications-outline">
+          <View style={styles.pushStatus}><Ionicons name={pushRegistrationState === 'registered' ? 'checkmark-circle' : 'phone-portrait-outline'} size={22} color={pushRegistrationState === 'registered' ? colors.primary : colors.inkMuted} /><View style={styles.documentText}><Text style={styles.rowTitle}>Phone notifications</Text><Text style={styles.rowDetail}>{pushRegistrationState === 'registered' ? 'Active on this device.' : pushRegistrationState === 'denied' ? 'Blocked in phone settings.' : pushRegistrationState === 'registering' ? 'Activating securely…' : 'Receive alerts even when Scholara is closed.'}</Text></View></View>
+          {pushRegistrationState === 'denied'
+            ? <Button label="Open phone settings" variant="secondary" onPress={() => void openNotificationSettings()} />
+            : pushRegistrationState !== 'registered'
+              ? <Button label={pushRegistrationState === 'registering' ? 'Activating…' : 'Enable phone notifications'} variant="secondary" disabled={pushRegistrationState === 'registering'} onPress={() => void enableDeviceNotifications()} />
+              : null}
           <ToggleRow label="Matches" detail="New connection requests and mutual matches." value={notifications.matches} onChange={(value) => changeNotification(setNotifications, 'matches', value)} />
           <ToggleRow label="Messages" detail="New messages from matched researchers." value={notifications.messages} onChange={(value) => changeNotification(setNotifications, 'messages', value)} />
           <ToggleRow label="Community" detail="Replies and helpful reactions." value={notifications.community} onChange={(value) => changeNotification(setNotifications, 'community', value)} />
@@ -144,6 +159,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, back: { width: 42, height: 42, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, headerSpacer: { width: 42 },
   card: { gap: spacing.md }, dangerCard: { borderColor: '#E8B9B9' }, cardTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, label: { color: colors.primaryDark, fontSize: 11, fontWeight: '900', letterSpacing: 1.1 }, dangerText: { color: colors.danger },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs }, documentText: { flex: 1, minWidth: 0, gap: 3 }, rowTitle: { color: colors.ink, fontSize: 15, fontWeight: '700' }, rowDetail: { color: colors.inkMuted, fontSize: 12, lineHeight: 17 }, toggle: { width: 48, height: 28, padding: 3, borderRadius: 14, backgroundColor: colors.border }, toggleOn: { backgroundColor: colors.primary }, knob: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.white }, knobOn: { alignSelf: 'flex-end' }, disabled: { opacity: 0.45 },
+  pushStatus: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.xs },
   documentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, borderTopWidth: 1, borderTopColor: colors.border }, consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm }, consentText: { flex: 1, color: colors.ink, lineHeight: 20 }, body: { color: colors.inkMuted, lineHeight: 21 }, status: { color: colors.primaryDark, fontWeight: '700', textTransform: 'capitalize' },
   modalBackdrop: { flex: 1, padding: spacing.lg, backgroundColor: 'rgba(9,25,20,0.55)', justifyContent: 'center' }, modalCard: { alignSelf: 'center', width: '100%', maxWidth: 480, gap: spacing.md, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.lg }, modalTitle: { color: colors.ink, fontSize: 23, fontWeight: '900' },
 });

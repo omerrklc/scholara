@@ -12,11 +12,12 @@ Scholara is a mobile academic network for early-career researchers. Its product 
 - Community posts, comments, helpful reactions, deletion, reporting, and blocking
 - Multi-reason private reports and an Engellenenler list
 - Account and privacy settings with notification preferences and versioned legal acceptance
+- Native push registration and a protected Expo push delivery function ready for hosted webhook deployment
 - Rate-limited data export requests and recently reauthenticated account deletion
 - Server-side validation, bounded queries, rate limits, RLS, and database security tests
 - Keyboard-aware responsive layouts tested on small mobile viewports
 
-This is a functional alpha, not a production release. Profile image upload, global institution/location normalization, push delivery, localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. The pre-release legal text requires professional review before public launch.
+This is a functional alpha, not a production release. Global institution/location normalization, push receipt processing, localization, moderation operations, export-file processing, analytics, and production delivery are planned phases. The pre-release legal text requires professional review before public launch.
 
 ## Run the app
 
@@ -56,5 +57,6 @@ Early SQL was applied manually, so remote migration history must be reconciled b
 - [Environment and release workflow](docs/ENVIRONMENTS.md)
 - [Phase 0 assessment and next gate](docs/PHASE_0_ASSESSMENT.md)
 - [Supabase security setup](SECURITY_SETUP.md)
+- [Native push notification delivery](docs/PUSH_NOTIFICATIONS.md)
 
 Authentication redirect URLs must include the exact callback for the active build. Production will move from the development custom scheme to verified iOS Universal Links and Android App Links before public distribution.

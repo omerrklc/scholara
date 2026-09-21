@@ -4,6 +4,7 @@ import { AppState as NativeAppState, Platform } from 'react-native';
 import { fetchDiscoveryActions, requestConnection, setSavedProfile, type ConnectionState } from '@/services/connections';
 import { fetchProfile, saveProfile } from '@/services/profiles';
 import { fetchUnreadNotificationCount, subscribeToNotificationInserts } from '@/services/notifications';
+import { syncPushRegistration, unregisterCurrentPushDevice, type PushRegistrationState } from '@/services/pushNotifications';
 import { isSupabaseConfigured, supabase } from '@/services/supabase';
 import type { Profile } from '@/types/domain';
 
@@ -23,6 +24,7 @@ type AppState = {
   authReady: boolean;
   profileLoading: boolean;
   unreadNotifications: number;
+  pushRegistrationState: PushRegistrationState;
   isSupabaseConfigured: boolean;
   updateProfile: (next: Profile) => void;
   completeOnboarding: (next: Profile) => Promise<string | null>;
@@ -30,6 +32,7 @@ type AppState = {
   connect: (id: string) => Promise<{ state: ConnectionState | null; error: string | null }>;
   refreshActions: () => Promise<string | null>;
   refreshNotifications: () => Promise<void>;
+  enablePushNotifications: () => Promise<PushRegistrationState>;
   signOut: () => Promise<string | null>;
 };
 
@@ -49,6 +52,7 @@ export function AppProvider({ children }: PropsWithChildren) {
   const [authReady, setAuthReady] = useState(!isSupabaseConfigured);
   const [profileLoading, setProfileLoading] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [pushRegistrationState, setPushRegistrationState] = useState<PushRegistrationState>('idle');
 
   useEffect(() => {
     if (!supabase) return;
@@ -63,6 +67,7 @@ export function AppProvider({ children }: PropsWithChildren) {
         setSaved([]);
         setConnectionStates({});
         setUnreadNotifications(0);
+        setPushRegistrationState('idle');
         setProfileLoading(false);
         setAuthReady(true);
         return;
@@ -126,8 +131,17 @@ export function AppProvider({ children }: PropsWithChildren) {
     };
   }, [session?.user.id]);
 
+  useEffect(() => {
+    if (!session?.user.id || !onboardingComplete) return;
+    let active = true;
+    void syncPushRegistration(false).then((state) => {
+      if (active) setPushRegistrationState(state);
+    });
+    return () => { active = false; };
+  }, [onboardingComplete, session?.user.id]);
+
   const value = useMemo<AppState>(() => ({
-    profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications, isSupabaseConfigured,
+    profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications, pushRegistrationState, isSupabaseConfigured,
     updateProfile: setProfile,
     completeOnboarding: async (next) => {
       if (!session) return 'You need to sign in before saving your profile.';
@@ -167,12 +181,19 @@ export function AppProvider({ children }: PropsWithChildren) {
       }
       setUnreadNotifications(await fetchUnreadNotificationCount());
     },
+    enablePushNotifications: async () => {
+      setPushRegistrationState('registering');
+      const state = await syncPushRegistration(true);
+      setPushRegistrationState(state);
+      return state;
+    },
     signOut: async () => {
       if (!supabase) return 'Supabase is not configured.';
+      await unregisterCurrentPushDevice();
       const { error } = await supabase.auth.signOut();
       return error?.message ?? null;
     },
-  }), [profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications]);
+  }), [profile, onboardingComplete, saved, connectionStates, session, authReady, profileLoading, unreadNotifications, pushRegistrationState]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

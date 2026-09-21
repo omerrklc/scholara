@@ -27,8 +27,12 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      - run: deno check supabase/functions/send-push-notification/index.ts
 
   database:
     name: Database migrations and RLS tests

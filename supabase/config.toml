@@ -45,3 +45,6 @@ enabled = true
 
 [analytics]
 enabled = false
+
+[functions.send-push-notification]
+verify_jwt = false

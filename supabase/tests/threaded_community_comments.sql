@@ -32,6 +32,7 @@ select isnt(
 reset role;
 
 select is((select parent_comment_id from public.community_comments where body = 'Top-level thought'), null::uuid, 'top-level comment has no parent');
+select set_config('test.root_comment_id', (select id::text from public.community_comments where body = 'Top-level thought'), true);
 
 select set_config('request.jwt.claims', '{"sub":"b1000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
 set local role authenticated;
@@ -39,7 +40,7 @@ select isnt(
   public.create_community_comment(
     'b4000000-0000-4000-8000-000000000004',
     'A nested response',
-    (select id from public.community_comments where body = 'Top-level thought')
+    current_setting('test.root_comment_id')::uuid
   ),
   null::uuid,
   'a signed-in user can reply to a comment'
@@ -49,7 +50,7 @@ select throws_ok(
     'select public.create_community_comment(%L, %L, %L)',
     'b5000000-0000-4000-8000-000000000005',
     'Invalid cross-post reply',
-    (select id from public.community_comments where body = 'Top-level thought')
+    current_setting('test.root_comment_id')::uuid
   ),
   '22023', 'Parent comment is unavailable', 'a parent from another post is rejected'
 );
@@ -57,7 +58,7 @@ reset role;
 
 select is(
   (select parent_comment_id from public.community_comments where body = 'A nested response'),
-  (select id from public.community_comments where body = 'Top-level thought'),
+  current_setting('test.root_comment_id')::uuid,
   'nested reply stores the validated parent'
 );
 select is(
@@ -79,7 +80,7 @@ select is(
 );
 select is(
   (select parent_comment_id from public.get_community_comments('b4000000-0000-4000-8000-000000000004', null, 100) where body = 'A nested response'),
-  (select id from public.community_comments where body = 'Top-level thought'),
+  current_setting('test.root_comment_id')::uuid,
   'the comment API returns parent relationships'
 );
 reset role;

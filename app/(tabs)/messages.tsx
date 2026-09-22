@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Button, Card, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { NotificationBell } from '@/components/NotificationBell';
 import { fetchConversationSummaries, type ConversationSummary } from '@/services/messaging';

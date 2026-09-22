@@ -18,12 +18,12 @@ export default function AuthCallbackScreen() {
     const completeVerification = async (url: string | null) => {
       if (!active) return;
       if (!supabase || !url) {
-        setError('Doğrulama bağlantısı açılamadı. Giriş ekranından devam edebilirsin.');
+        setError('The verification link could not be opened. You can continue from the sign-in screen.');
         return;
       }
       const callback = getAuthCodeFromUrl(url);
       if (callback.error || !callback.code) {
-        setError('Doğrulama bağlantısı geçersiz veya süresi dolmuş. Yeni bir bağlantı isteyebilirsin.');
+        setError('The verification link is invalid or expired. You can request a new link.');
         return;
       }
       if (!consumeAuthCodeOnce(processedCodes.current, callback.code)) return;
@@ -31,7 +31,7 @@ export default function AuthCallbackScreen() {
       const { error: sessionError } = await supabase.auth.exchangeCodeForSession(callback.code);
       if (!active) return;
       if (sessionError) {
-        setError('Bu doğrulama bağlantısı geçersiz, süresi dolmuş veya daha önce kullanılmış. Yeni bir bağlantı isteyebilirsin.');
+        setError('This verification link is invalid, expired, or already used. You can request a new link.');
         return;
       }
       router.replace(callback.nextRoute);
@@ -47,10 +47,10 @@ export default function AuthCallbackScreen() {
 
   return <Screen style={styles.container}>
     <BrandMark />
-    {!error ? <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /><SectionTitle eyebrow="E-posta doğrulandı" title="Scholara hesabın hazırlanıyor…" /></View> : <>
-      <SectionTitle eyebrow="Doğrulama tamamlandı" title="Scholara'ya geri dön." />
+    {!error ? <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /><SectionTitle eyebrow="Email verified" title="Preparing your Scholara account…" /></View> : <>
+      <SectionTitle eyebrow="Verification finished" title="Return to Scholara." />
       <MessageBanner message={error} tone="info" />
-      <Button label="Giriş ekranına git" onPress={() => router.replace('/sign-in')} />
+      <Button label="Go to sign in" onPress={() => router.replace('/sign-in')} />
     </>}
   </Screen>;
 }

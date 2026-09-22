@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import type { Researcher } from '@/types/domain';
 import type { ConnectionState } from '@/services/connections';
 import { Button, Card, Chip } from '@/components/ui';

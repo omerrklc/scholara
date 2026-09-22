@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Button, Card, Chip, MessageBanner, Screen } from '@/components/ui';
 import { setSavedProfile, type ConnectionState } from '@/services/connections';

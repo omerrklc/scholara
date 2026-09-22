@@ -40,4 +40,14 @@ describe('buildCommentThread', () => {
 
     expect(thread.map(({ comment: item }) => item.id)).toEqual(['orphan', 'cycle-a', 'cycle-b']);
   });
+
+  it('hides replies until their parent thread is expanded', () => {
+    const comments = [comment('root', null), comment('child', 'root'), comment('grandchild', 'child')];
+
+    expect(buildCommentThread(comments, new Set()).map(({ comment: item, replyCount }) => [item.id, replyCount])).toEqual([
+      ['root', 1],
+    ]);
+    expect(buildCommentThread(comments, new Set(['root'])).map(({ comment: item }) => item.id)).toEqual(['root', 'child']);
+    expect(buildCommentThread(comments, new Set(['root', 'child'])).map(({ comment: item }) => item.id)).toEqual(['root', 'child', 'grandchild']);
+  });
 });

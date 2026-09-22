@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Button, Card, Chip, Field, MessageBanner } from '@/components/ui';
@@ -10,6 +11,7 @@ import {
 } from '@/services/community';
 import { buildCommentThread } from '@/services/communityThread';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 const categories: { value: CommunityCategory; label: string }[] = [
   { value: 'research', label: 'Research' },
@@ -17,7 +19,7 @@ const categories: { value: CommunityCategory; label: string }[] = [
   { value: 'academic_life', label: 'Academic life' },
 ];
 
-const dateLabel = (value: string) => new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const dateLabel = (value: string, locale: string) => new Date(value).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 const initials = (name: string) => name.split(' ').filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 
 function ModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
@@ -62,17 +64,19 @@ export function CommunityComposerModal({ onClose, onPublished }: { onClose: () =
 }
 
 export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: { post: CommunityPost; onClose: () => void; onChanged: () => void; onBlocked: (authorId: string) => void }) {
+  const { locale, t } = useI18n();
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [replyingTo, setReplyingTo] = useState<CommunityComment | null>(null);
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(() => new Set());
   const [deleteTarget, setDeleteTarget] = useState<CommunityComment | null>(null);
   const [safetyTarget, setSafetyTarget] = useState<CommunityComment | null>(null);
   const commentsScrollRef = useRef<ScrollView>(null);
   const revealNewestComment = useRef(false);
-  const threadedComments = useMemo(() => buildCommentThread(comments), [comments]);
+  const threadedComments = useMemo(() => buildCommentThread(comments, expandedThreads), [comments, expandedThreads]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -96,7 +100,8 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
 
   const send = async () => {
     if (!draft.trim() || busy) return;
-    const isThreadReply = Boolean(replyingTo);
+    const parentCommentId = replyingTo?.id ?? null;
+    const isThreadReply = Boolean(parentCommentId);
     setBusy(true);
     setError('');
     const result = await createCommunityComment(post.id, draft, replyingTo?.id ?? null);
@@ -104,6 +109,7 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
     if (result.error) setError(result.error);
     else {
       setDraft('');
+      if (parentCommentId) setExpandedThreads((current) => new Set(current).add(parentCommentId));
       setReplyingTo(null);
       Keyboard.dismiss();
       await load();
@@ -145,22 +151,23 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
           style={styles.commentsScroll}
         >
           <View style={styles.postSummary}>
-            <View style={styles.summaryHeader}><View style={styles.summaryAvatar}><Text style={styles.summaryAvatarText}>{initials(post.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.summaryAuthor}>{post.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{post.authorStage}{post.authorUniversity ? ` · ${post.authorUniversity}` : ''} · {dateLabel(post.createdAt)}</Text></View></View>
+            <View style={styles.summaryHeader}><View style={styles.summaryAvatar}><Text style={styles.summaryAvatarText}>{initials(post.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.summaryAuthor}>{post.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{post.authorStage}{post.authorUniversity ? ` · ${post.authorUniversity}` : ''} · {dateLabel(post.createdAt, locale)}</Text></View></View>
             <Text style={styles.summaryBody}>{post.body}</Text>
-            <View style={styles.discussionLabel}><Ionicons name="chatbubbles-outline" size={16} color={colors.primary} /><Text style={styles.discussionLabelText}>{comments.length} {comments.length === 1 ? 'comment' : 'comments'}</Text></View>
+            <View style={styles.discussionLabel}><Ionicons name="chatbubbles-outline" size={16} color={colors.primary} /><Text style={styles.discussionLabelText}>{comments.length} {t(comments.length === 1 ? 'comment' : 'comments')}</Text></View>
           </View>
           {error ? <MessageBanner message={error} /> : null}
           {loading ? <ActivityIndicator color={colors.primary} /> : null}
           {!loading && comments.length === 0 ? <View style={styles.empty}><Ionicons name="chatbubble-ellipses-outline" size={38} color={colors.primary} /><Text style={styles.emptyTitle}>No replies yet</Text><Text style={styles.note}>Start a thoughtful academic discussion.</Text></View> : null}
-          {threadedComments.map(({ comment, depth }) => <View key={comment.id} style={[styles.comment, { marginLeft: Math.min(depth, 3) * 18 }]}>
+          {threadedComments.map(({ comment, depth, replyCount }) => <View key={comment.id} style={[styles.comment, { marginLeft: Math.min(depth, 3) * 18 }]}>
             {depth > 0 ? <View style={styles.threadLine} /> : null}
             <View style={styles.commentMain}>
-              <View style={styles.commentHeader}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{initials(comment.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.commentAuthor}>{comment.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{comment.authorStage}{comment.authorUniversity ? ` · ${comment.authorUniversity}` : ''} · {dateLabel(comment.createdAt)}</Text></View></View>
+              <View style={styles.commentHeader}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{initials(comment.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.commentAuthor}>{comment.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{comment.authorStage}{comment.authorUniversity ? ` · ${comment.authorUniversity}` : ''} · {dateLabel(comment.createdAt, locale)}</Text></View></View>
               <Text style={styles.commentBody}>{comment.body}</Text>
               <View style={styles.commentActions}>
                 <Pressable accessibilityLabel={`Reply to ${comment.authorName}`} accessibilityRole="button" onPress={() => setReplyingTo(comment)} style={styles.commentAction}><Ionicons name="return-down-forward-outline" size={16} color={colors.inkMuted} /><Text style={styles.commentActionText}>Reply</Text></Pressable>
                 <Pressable accessibilityLabel={comment.viewerOwns ? 'Delete your comment' : `Safety options for ${comment.authorName}`} accessibilityRole="button" onPress={() => comment.viewerOwns ? setDeleteTarget(comment) : setSafetyTarget(comment)} style={styles.commentAction}><Ionicons name={comment.viewerOwns ? 'trash-outline' : 'ellipsis-horizontal'} size={16} color={comment.viewerOwns ? colors.danger : colors.inkMuted} /><Text style={[styles.commentActionText, comment.viewerOwns && styles.deleteText]}>{comment.viewerOwns ? 'Delete' : 'More'}</Text></Pressable>
               </View>
+              {replyCount > 0 ? <Pressable accessibilityRole="button" accessibilityState={{ expanded: expandedThreads.has(comment.id) }} onPress={() => setExpandedThreads((current) => { const next = new Set(current); if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id); return next; })} style={styles.repliesToggle}><View style={styles.repliesRail} /><Ionicons name={expandedThreads.has(comment.id) ? 'chevron-up' : 'chevron-down'} size={15} color={colors.primary} /><Text style={styles.repliesToggleText}>{expandedThreads.has(comment.id) ? t('Hide replies') : `${replyCount} ${t(replyCount === 1 ? 'reply' : 'replies')}`}</Text></Pressable> : null}
             </View>
           </View>)}
         </ScrollView>
@@ -213,6 +220,9 @@ const styles = StyleSheet.create({
   commentAction: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, borderRadius: radius.sm },
   commentActionText: { color: colors.inkMuted, fontSize: 11, fontWeight: '800' },
   deleteText: { color: colors.danger },
+  repliesToggle: { minHeight: 38, flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingRight: spacing.sm },
+  repliesRail: { width: 18, height: 2, borderRadius: 1, backgroundColor: '#A8CFC1' },
+  repliesToggleText: { color: colors.primaryDark, fontSize: 11, fontWeight: '900' },
   composer: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.xs, paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
   replyingBanner: { minHeight: 42, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingLeft: spacing.sm, borderLeftWidth: 3, borderLeftColor: colors.primary, backgroundColor: colors.primarySoft },
   replyingText: { flex: 1, minWidth: 0 },

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockUser, reportCommunityComment, reportCommunityPost, reportUser, type ReportReason, type SafetySource } from '@/services/moderation';
 import { Button, Chip, Field, MessageBanner } from '@/components/ui';

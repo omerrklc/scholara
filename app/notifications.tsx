@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Card, MessageBanner, Screen } from '@/components/ui';
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead, type NotificationItem, type NotificationKind } from '@/services/notifications';
 import { useApp } from '@/state/AppProvider';

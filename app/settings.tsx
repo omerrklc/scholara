@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Button, Card, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
+import { Button, Card, Chip, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import {
   acceptCurrentLegalDocuments, createDataExportRequest, defaultAccountSettings, fetchAccountSettings,
   permanentlyDeleteAccount, updateNotificationPreferences, updatePrivacyPreferences,
@@ -11,6 +12,7 @@ import {
 import { openNotificationSettings } from '@/services/pushNotifications';
 import { useApp } from '@/state/AppProvider';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { appLanguages, useI18n } from '@/i18n';
 
 const legalLabels: Record<LegalDocumentKey, string> = {
   terms: 'Terms of Service', privacy: 'Privacy Notice', community_guidelines: 'Community Guidelines',
@@ -18,6 +20,7 @@ const legalLabels: Record<LegalDocumentKey, string> = {
 
 export default function SettingsScreen() {
   const { enablePushNotifications, profile, pushRegistrationState, session, updateProfile } = useApp();
+  const { language, setLanguage } = useI18n();
   const [notifications, setNotifications] = useState(defaultAccountSettings.notifications);
   const [privacy, setPrivacy] = useState(defaultAccountSettings.privacy);
   const [legal, setLegal] = useState(defaultAccountSettings.legal);
@@ -87,6 +90,11 @@ export default function SettingsScreen() {
       <SectionTitle eyebrow="Account controls" title="Privacy, notifications and your data." subtitle="Changes are stored securely with your Scholara account." />
       {message ? <MessageBanner message={message.text} tone={message.error ? 'error' : 'success'} /> : null}
       {loading ? <ActivityIndicator color={colors.primary} size="large" /> : <>
+        <SettingsCard title="APP LANGUAGE" icon="language-outline">
+          <Text style={styles.body}>Choose the language used throughout Scholara.</Text>
+          <View accessibilityRole="radiogroup" style={styles.languages}>{appLanguages.map((item) => <Chip key={item.code} label={item.label} selected={language === item.code} onPress={() => void setLanguage(item.code)} />)}</View>
+        </SettingsCard>
+
         <SettingsCard title="PRIVACY" icon="lock-closed-outline">
           <ToggleRow label="Show current city" detail="Other researchers can see your current city and country." value={privacy.currentLocation} onChange={(value) => setPrivacy((current) => ({ ...current, currentLocation: value }))} />
           <ToggleRow label="Show moving destination" detail="Only applies when you are planning a move." value={privacy.relocationDestination} disabled={!profile.isRelocating} onChange={(value) => setPrivacy((current) => ({ ...current, relocationDestination: value }))} />
@@ -160,6 +168,7 @@ const styles = StyleSheet.create({
   card: { gap: spacing.md }, dangerCard: { borderColor: '#E8B9B9' }, cardTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, label: { color: colors.primaryDark, fontSize: 11, fontWeight: '900', letterSpacing: 1.1 }, dangerText: { color: colors.danger },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs }, documentText: { flex: 1, minWidth: 0, gap: 3 }, rowTitle: { color: colors.ink, fontSize: 15, fontWeight: '700' }, rowDetail: { color: colors.inkMuted, fontSize: 12, lineHeight: 17 }, toggle: { width: 48, height: 28, padding: 3, borderRadius: 14, backgroundColor: colors.border }, toggleOn: { backgroundColor: colors.primary }, knob: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.white }, knobOn: { alignSelf: 'flex-end' }, disabled: { opacity: 0.45 },
   pushStatus: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.xs },
+  languages: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   documentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, borderTopWidth: 1, borderTopColor: colors.border }, consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm }, consentText: { flex: 1, color: colors.ink, lineHeight: 20 }, body: { color: colors.inkMuted, lineHeight: 21 }, status: { color: colors.primaryDark, fontWeight: '700', textTransform: 'capitalize' },
   modalBackdrop: { flex: 1, padding: spacing.lg, backgroundColor: 'rgba(9,25,20,0.55)', justifyContent: 'center' }, modalCard: { alignSelf: 'center', width: '100%', maxWidth: 480, gap: spacing.md, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.lg }, modalTitle: { color: colors.ink, fontSize: 23, fontWeight: '900' },
 });

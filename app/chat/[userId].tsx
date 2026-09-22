@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Button, Card, MessageBanner, Screen } from '@/components/ui';
 import { SafetySheet } from '@/components/SafetySheet';
 import { fetchConversation, fetchConversationSummaries, markConversationRead, sendChatMessage, subscribeToConversation, type ChatMessage } from '@/services/messaging';

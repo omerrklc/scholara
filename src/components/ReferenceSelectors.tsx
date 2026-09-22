@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Field, MessageBanner } from '@/components/ui';
 import { getCountryOptions, searchCities, searchInstitutions, type CityOption, type CountryOption, type InstitutionOption } from '@/services/referenceData';
 import { colors, radius, spacing } from '@/theme/tokens';

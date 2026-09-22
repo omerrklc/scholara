@@ -3,6 +3,7 @@ import { PropsWithChildren, ReactNode, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, StyleSheet, Text, TextInput, TextInputProps, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, radius, shadow, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 export function Screen({ children, scroll = true, style }: PropsWithChildren<{ scroll?: boolean; style?: StyleProp<ViewStyle> }>) {
   const { height, width } = useWindowDimensions();
@@ -28,7 +29,8 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
 }
 
 export function Button({ label, onPress, variant = 'primary', disabled = false, icon }: { label: string; onPress: () => void; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; disabled?: boolean; icon?: ReactNode }) {
-  return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, styles[`button_${variant}`], pressed && styles.pressed, disabled && styles.disabled]}>{icon}<Text maxFontSizeMultiplier={1.3} style={[styles.buttonText, styles[`buttonText_${variant}`]]}>{label}</Text></Pressable>;
+  const { t } = useI18n();
+  return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, styles[`button_${variant}`], pressed && styles.pressed, disabled && styles.disabled]}>{icon}<Text maxFontSizeMultiplier={1.3} style={[styles.buttonText, styles[`buttonText_${variant}`]]}>{t(label)}</Text></Pressable>;
 }
 
 export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
@@ -36,15 +38,17 @@ export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<
 }
 
 export function Chip({ label, selected = false, onPress }: { label: string; selected?: boolean; onPress?: () => void }) {
-  const content = <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{label}</Text>;
+  const { t } = useI18n();
+  const content = <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{t(label)}</Text>;
   return onPress ? <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>{content}</Pressable> : <View style={[styles.chip, selected && styles.chipSelected]}>{content}</View>;
 }
 
 export function Field({ label, multiline = false, accessory, style, ...props }: TextInputProps & { label: string; accessory?: ReactNode }) {
+  const { t } = useI18n();
   return <View style={styles.fieldWrap}>
-    <Text maxFontSizeMultiplier={1.3} style={styles.label}>{label}</Text>
+    <Text maxFontSizeMultiplier={1.3} style={styles.label}>{t(label)}</Text>
     <View style={styles.inputWrap}>
-      <TextInput accessibilityLabel={label} maxFontSizeMultiplier={1.3} placeholderTextColor="#8C9691" multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined, style]} {...props} />
+      <TextInput accessibilityLabel={t(label)} maxFontSizeMultiplier={1.3} placeholderTextColor="#8C9691" multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined, style]} {...props} placeholder={typeof props.placeholder === 'string' ? t(props.placeholder) : props.placeholder} />
       {accessory ? <View style={styles.inputAccessory}>{accessory}</View> : null}
     </View>
   </View>;
@@ -52,13 +56,14 @@ export function Field({ label, multiline = false, accessory, style, ...props }: 
 
 export function PasswordField(props: Omit<TextInputProps, 'secureTextEntry'> & { label: string }) {
   const [visible, setVisible] = useState(false);
+  const { t } = useI18n();
   return <Field
     {...props}
     autoCapitalize="none"
     autoCorrect={false}
     secureTextEntry={!visible}
     accessory={<Pressable
-      accessibilityLabel={visible ? 'Şifreyi gizle' : 'Şifreyi göster'}
+      accessibilityLabel={t(visible ? 'Hide password' : 'Show password')}
       accessibilityRole="button"
       hitSlop={8}
       onPress={() => setVisible((current) => !current)}
@@ -68,17 +73,20 @@ export function PasswordField(props: Omit<TextInputProps, 'secureTextEntry'> & {
 }
 
 export function SegmentedControl<T extends string>({ value, options, onChange }: { value: T; options: { label: string; value: T }[]; onChange: (value: T) => void }) {
-  return <View accessibilityRole="tablist" style={styles.segment}>{options.map((option) => <Pressable accessibilityRole="tab" accessibilityState={{ selected: value === option.value }} key={option.value} onPress={() => onChange(option.value)} style={[styles.segmentItem, value === option.value && styles.segmentActive]}><Text style={[styles.segmentText, value === option.value && styles.segmentTextActive]}>{option.label}</Text></Pressable>)}</View>;
+  const { t } = useI18n();
+  return <View accessibilityRole="tablist" style={styles.segment}>{options.map((option) => <Pressable accessibilityRole="tab" accessibilityState={{ selected: value === option.value }} key={option.value} onPress={() => onChange(option.value)} style={[styles.segmentItem, value === option.value && styles.segmentActive]}><Text style={[styles.segmentText, value === option.value && styles.segmentTextActive]}>{t(option.label)}</Text></Pressable>)}</View>;
 }
 
 export function SectionTitle({ eyebrow, title, subtitle }: { eyebrow?: string; title: string; subtitle?: string }) {
+  const { t } = useI18n();
   const { height, width } = useWindowDimensions();
   const compact = width < 380 || height < 720;
-  return <View style={[styles.titleWrap, compact && styles.titleWrapCompact]}>{eyebrow && <Text maxFontSizeMultiplier={1.25} style={styles.eyebrow}>{eyebrow}</Text>}<Text maxFontSizeMultiplier={1.2} style={[styles.title, compact && styles.titleCompact]}>{title}</Text>{subtitle && <Text maxFontSizeMultiplier={1.25} style={[styles.subtitle, compact && styles.subtitleCompact]}>{subtitle}</Text>}</View>;
+  return <View style={[styles.titleWrap, compact && styles.titleWrapCompact]}>{eyebrow && <Text maxFontSizeMultiplier={1.25} style={styles.eyebrow}>{t(eyebrow)}</Text>}<Text maxFontSizeMultiplier={1.2} style={[styles.title, compact && styles.titleCompact]}>{t(title)}</Text>{subtitle && <Text maxFontSizeMultiplier={1.25} style={[styles.subtitle, compact && styles.subtitleCompact]}>{t(subtitle)}</Text>}</View>;
 }
 
 export function MessageBanner({ message, tone = 'error' }: { message: string; tone?: 'error' | 'success' | 'info' }) {
-  return <View accessibilityRole="alert" style={[styles.banner, styles[`banner_${tone}`]]}><Text style={[styles.bannerText, styles[`bannerText_${tone}`]]}>{message}</Text></View>;
+  const { t } = useI18n();
+  return <View accessibilityRole="alert" style={[styles.banner, styles[`banner_${tone}`]]}><Text style={[styles.bannerText, styles[`bannerText_${tone}`]]}>{t(message)}</Text></View>;
 }
 
 const styles = StyleSheet.create({

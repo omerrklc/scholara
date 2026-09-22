@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Button, Card, Chip, MessageBanner, Screen } from '@/components/ui';
 import { NotificationBell } from '@/components/NotificationBell';
 import { fetchBlockedUsers, unblockUser, type BlockedUser } from '@/services/moderation';

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { Button, Card, Chip, Field, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { CitySelect, CountrySelect, InstitutionSelect } from '@/components/ReferenceSelectors';
 import { chooseAndUploadProfilePhoto, createProfilePhotoUrl, removeProfilePhoto } from '@/services/profilePhotos';

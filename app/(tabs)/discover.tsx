@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { ResearcherCard } from '@/components/ResearcherCard';
 import { NotificationBell } from '@/components/NotificationBell';
 import { SafetySheet } from '@/components/SafetySheet';

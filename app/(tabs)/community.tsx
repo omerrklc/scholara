@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommunityCommentsModal, CommunityComposerModal } from '@/components/CommunityModals';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -10,6 +11,7 @@ import { Button, Card, Chip, MessageBanner, Screen, SectionTitle } from '@/compo
 import { deleteCommunityPost, fetchCommunityPosts, toggleCommunityHelpful, type CommunityCategory, type CommunityPost } from '@/services/community';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 type FeedFilter = CommunityCategory | 'all';
 
@@ -24,10 +26,11 @@ const categoryLabel: Record<CommunityCategory, string> = {
   research: 'Research', relocation: 'Relocation', academic_life: 'Academic life',
 };
 
-const dateLabel = (value: string) => new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const dateLabel = (value: string, locale: string) => new Date(value).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 const initials = (name: string) => name.split(' ').filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
 
 export default function CommunityScreen() {
+  const { locale, t } = useI18n();
   const { onboardingComplete } = useApp();
   const [filter, setFilter] = useState<FeedFilter>('all');
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -106,14 +109,14 @@ export default function CommunityScreen() {
       renderItem={({ item }) => <Card style={styles.post}>
         <View style={styles.postHeader}>
           <View style={styles.avatar}><Text style={styles.avatarText}>{initials(item.authorName)}</Text></View>
-          <View style={styles.postIdentity}><Text style={styles.author}>{item.authorName}</Text><Text numberOfLines={1} style={styles.context}>{item.authorStage}{item.authorUniversity ? ` · ${item.authorUniversity}` : ''} · {dateLabel(item.createdAt)}</Text></View>
+          <View style={styles.postIdentity}><Text style={styles.author}>{item.authorName}</Text><Text numberOfLines={1} style={styles.context}>{item.authorStage}{item.authorUniversity ? ` · ${item.authorUniversity}` : ''} · {dateLabel(item.createdAt, locale)}</Text></View>
           <Pressable accessibilityLabel={item.viewerOwns ? 'Delete your post' : `Safety options for ${item.authorName}`} accessibilityRole="button" onPress={() => item.viewerOwns ? setDeletePost(item) : setSafetyPost(item)} style={styles.more}><Ionicons name={item.viewerOwns ? 'trash-outline' : 'ellipsis-horizontal'} size={20} color={item.viewerOwns ? colors.danger : colors.inkMuted} /></Pressable>
         </View>
         <View style={styles.topic}><Chip label={categoryLabel[item.category]} /></View>
         <Text style={styles.body}>{item.body}</Text>
         <View style={styles.stats}>
-          <Pressable accessibilityLabel={`Open ${item.replyCount} replies`} accessibilityRole="button" onPress={() => setCommentsPost(item)} style={styles.statButton}><Ionicons name="chatbubble-outline" size={17} color={colors.inkMuted} /><Text style={styles.stat}>{item.replyCount} replies</Text></Pressable>
-          <Pressable accessibilityLabel={item.viewerHelpful ? 'Remove helpful vote' : 'Mark as helpful'} accessibilityRole="button" disabled={busyId === item.id} onPress={() => void markHelpful(item)} style={[styles.statButton, item.viewerHelpful && styles.helpful]}><Ionicons name={item.viewerHelpful ? 'arrow-up-circle' : 'arrow-up-circle-outline'} size={18} color={item.viewerHelpful ? colors.primary : colors.inkMuted} /><Text style={[styles.stat, item.viewerHelpful && styles.helpfulText]}>{item.helpfulCount} helpful</Text></Pressable>
+          <Pressable accessibilityLabel={`Open ${item.replyCount} replies`} accessibilityRole="button" onPress={() => setCommentsPost(item)} style={styles.statButton}><Ionicons name="chatbubble-outline" size={17} color={colors.inkMuted} /><Text style={styles.stat}>{item.replyCount} {t(item.replyCount === 1 ? 'reply' : 'replies')}</Text></Pressable>
+          <Pressable accessibilityLabel={item.viewerHelpful ? 'Remove helpful vote' : 'Mark as helpful'} accessibilityRole="button" disabled={busyId === item.id} onPress={() => void markHelpful(item)} style={[styles.statButton, item.viewerHelpful && styles.helpful]}><Ionicons name={item.viewerHelpful ? 'arrow-up-circle' : 'arrow-up-circle-outline'} size={18} color={item.viewerHelpful ? colors.primary : colors.inkMuted} /><Text style={[styles.stat, item.viewerHelpful && styles.helpfulText]}>{item.helpfulCount} {t('helpful')}</Text></Pressable>
         </View>
       </Card>}
     />

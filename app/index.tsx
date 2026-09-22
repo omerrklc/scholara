@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Text } from '@/components/LocalizedText';
 import { BrandMark, Button, Card, Screen } from '@/components/ui';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';

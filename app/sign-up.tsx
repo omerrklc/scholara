@@ -1,11 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { BrandMark, Button, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import { getAuthRedirectUrl } from '@/services/auth';
 import { publicAuthError } from '@/services/authErrors';
 import { supabase } from '@/services/supabase';
-import { spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, spacing } from '@/theme/tokens';
 
 export default function SignUpScreen() {
   const { height, width } = useWindowDimensions();
@@ -56,4 +56,4 @@ export default function SignUpScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ container: { gap: spacing.lg }, containerCompact: { gap: spacing.sm }, form: { gap: spacing.md } });
+const styles = createThemedStyleSheet(() => ({ container: { gap: spacing.lg }, containerCompact: { gap: spacing.sm }, form: { gap: spacing.md } }));

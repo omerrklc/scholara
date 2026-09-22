@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Card, Screen, SectionTitle } from '@/components/ui';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 
 const documents = {
   terms: { title: 'Terms of Service', sections: ['Use Scholara respectfully and provide accurate account information.', 'Do not misuse discovery, messaging, reporting, or community features.', 'Scholara may restrict accounts that threaten users, privacy, security, or service availability.'] },
@@ -18,4 +18,4 @@ export default function LegalDocumentScreen() {
   return <Screen><View style={styles.header}><Pressable accessibilityLabel="Back" accessibilityRole="button" onPress={() => router.back()} style={styles.back}><Ionicons name="arrow-back" size={21} color={colors.ink} /></Pressable><Text style={styles.version}>Version 2026-09-11</Text></View><SectionTitle eyebrow="Scholara" title={content.title} subtitle="Pre-release policy for the Scholara MVP. It will be reviewed before public launch." />{content.sections.map((section, index) => <Card key={section} style={styles.section}><Text style={styles.number}>{index + 1}</Text><Text style={styles.text}>{section}</Text></Card>)}</Screen>;
 }
 
-const styles = StyleSheet.create({ header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, back: { width: 42, height: 42, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, version: { color: colors.inkMuted, fontSize: 12, fontWeight: '700' }, section: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }, number: { color: colors.primary, fontSize: 20, fontWeight: '900' }, text: { flex: 1, color: colors.ink, lineHeight: 22 }, link: { color: colors.primary, fontWeight: '700' } });
+const styles = createThemedStyleSheet(() => ({ header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, back: { width: 42, height: 42, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, version: { color: colors.inkMuted, fontSize: 12, fontWeight: '700' }, section: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md }, number: { color: colors.primary, fontSize: 20, fontWeight: '900' }, text: { flex: 1, color: colors.ink, lineHeight: 22 }, link: { color: colors.primary, fontWeight: '700' } }));

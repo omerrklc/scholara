@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Field, MessageBanner } from '@/components/ui';
 import { getCountryOptions, searchCities, searchInstitutions, type CityOption, type CountryOption, type InstitutionOption } from '@/services/referenceData';
-import { colors, radius, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 type CountryProps = { label: string; value: CountryOption | null; onSelect: (country: CountryOption) => void };
@@ -107,9 +107,9 @@ function Result({ title, subtitle, onPress }: { title: string; subtitle: string;
   </Pressable>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   wrap: { gap: spacing.xs, minWidth: 0 }, results: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.surface },
   result: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border, minHeight: 50, justifyContent: 'center' },
   pressed: { backgroundColor: colors.primarySoft }, title: { color: colors.ink, fontWeight: '700' }, subtitle: { color: colors.inkMuted, fontSize: 12, marginTop: 2 },
   empty: { color: colors.inkMuted, fontSize: 12, lineHeight: 18 }, verified: { color: colors.primaryDark, fontSize: 12, fontWeight: '700' },
-});
+}));

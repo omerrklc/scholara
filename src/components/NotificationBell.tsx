@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { useApp } from '@/state/AppProvider';
-import { colors } from '@/theme/tokens';
+import { createThemedStyleSheet, colors } from '@/theme/tokens';
 
 export function NotificationBell() {
   const { refreshNotifications, unreadNotifications } = useApp();
@@ -16,4 +16,4 @@ export function NotificationBell() {
   </Pressable>;
 }
 
-const styles = StyleSheet.create({ button: { width: 44, height: 44, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, badge: { position: 'absolute', right: -3, top: -4, minWidth: 19, height: 19, borderRadius: 10, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.danger, borderWidth: 2, borderColor: colors.background }, badgeText: { color: colors.white, fontSize: 9, fontWeight: '900' } });
+const styles = createThemedStyleSheet(() => ({ button: { width: 44, height: 44, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }, badge: { position: 'absolute', right: -3, top: -4, minWidth: 19, height: 19, borderRadius: 10, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.danger, borderWidth: 2, borderColor: colors.background }, badgeText: { color: colors.white, fontSize: 9, fontWeight: '900' } }));

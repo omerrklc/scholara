@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { BrandMark, Button, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import { publicAuthError } from '@/services/authErrors';
 import { getPasswordResetRedirectUrl } from '@/services/passwordReset';
 import { supabase } from '@/services/supabase';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 
 export default function SignInScreen() {
   const { height, width } = useWindowDimensions();
@@ -91,4 +91,4 @@ export default function SignInScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ container: { gap: spacing.lg }, containerCompact: { gap: spacing.sm }, form: { gap: spacing.md }, forgot: { alignSelf: 'flex-end', color: colors.primary, fontWeight: '700' }, forgotDisabled: { color: colors.inkMuted } });
+const styles = createThemedStyleSheet(() => ({ container: { gap: spacing.lg }, containerCompact: { gap: spacing.sm }, form: { gap: spacing.md }, forgot: { alignSelf: 'flex-end', color: colors.primary, fontWeight: '700' }, forgotDisabled: { color: colors.inkMuted } }));

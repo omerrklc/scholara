@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Card, MessageBanner, Screen } from '@/components/ui';
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead, type NotificationItem, type NotificationKind } from '@/services/notifications';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 const labels: Record<NotificationKind, { title: string; icon: keyof typeof Ionicons.glyphMap }> = {
@@ -105,6 +105,6 @@ export default function NotificationsScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({
-  screen: { paddingBottom: spacing.sm }, header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerText: { flex: 1, minWidth: 0 }, title: { color: colors.ink, fontSize: 20, fontWeight: '900' }, subtitle: { color: colors.inkMuted, fontSize: 11 }, markAll: { minHeight: 40, justifyContent: 'center', paddingHorizontal: spacing.sm }, markAllText: { color: colors.primary, fontSize: 12, fontWeight: '800' }, markPlaceholder: { width: 56 }, list: { gap: spacing.sm, paddingTop: spacing.md, paddingBottom: spacing.xl }, emptyList: { flexGrow: 1, justifyContent: 'center' }, item: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.sm }, unread: { backgroundColor: colors.primarySoft, borderColor: '#A8CFC1' }, avatar: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, overflow: 'hidden' }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontWeight: '900' }, content: { flex: 1, minWidth: 0, gap: 4 }, body: { color: colors.ink, fontSize: 13, lineHeight: 18 }, actor: { fontWeight: '900' }, time: { color: colors.inkMuted, fontSize: 10 }, kindIcon: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }, dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, emptyTitle: { color: colors.ink, fontSize: 19, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 20 }, footerLoader: { padding: spacing.md },
-});
+const styles = createThemedStyleSheet(() => ({
+  screen: { paddingBottom: spacing.sm }, header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerText: { flex: 1, minWidth: 0 }, title: { color: colors.ink, fontSize: 20, fontWeight: '900' }, subtitle: { color: colors.inkMuted, fontSize: 11 }, markAll: { minHeight: 40, justifyContent: 'center', paddingHorizontal: spacing.sm }, markAllText: { color: colors.primary, fontSize: 12, fontWeight: '800' }, markPlaceholder: { width: 56 }, list: { gap: spacing.sm, paddingTop: spacing.md, paddingBottom: spacing.xl }, emptyList: { flexGrow: 1, justifyContent: 'center' }, item: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.sm }, unread: { backgroundColor: colors.primarySoft, borderColor: colors.selectedBorder }, avatar: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, overflow: 'hidden' }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontWeight: '900' }, content: { flex: 1, minWidth: 0, gap: 4 }, body: { color: colors.ink, fontSize: 13, lineHeight: 18 }, actor: { fontWeight: '900' }, time: { color: colors.inkMuted, fontSize: 10 }, kindIcon: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }, dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, emptyTitle: { color: colors.ink, fontSize: 19, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 20 }, footerLoader: { padding: spacing.md },
+}));

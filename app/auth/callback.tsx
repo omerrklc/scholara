@@ -1,12 +1,12 @@
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { BrandMark, Button, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { consumeAuthCodeOnce } from '@/services/authCallback';
 import { getAuthCodeFromUrl } from '@/services/auth';
 import { supabase } from '@/services/supabase';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 
 export default function AuthCallbackScreen() {
   const [error, setError] = useState('');
@@ -55,4 +55,4 @@ export default function AuthCallbackScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ container: { gap: spacing.lg }, center: { flex: 1, justifyContent: 'center', gap: spacing.xl } });
+const styles = createThemedStyleSheet(() => ({ container: { gap: spacing.lg }, center: { flex: 1, justifyContent: 'center', gap: spacing.xl } }));

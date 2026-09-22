@@ -1,6 +1,11 @@
 import type { PhraseRow } from './index';
 
 export const extraRows: PhraseRow[] = [
+  ['APPEARANCE', 'APPARENCE', 'APARIENCIA', 'ASPETTO', 'DARSTELLUNG', 'GÖRÜNÜM', '外观', '表示', 'ВИД'],
+  ['Choose how Scholara looks. System follows your phone setting.', 'Choisissez l’apparence de Scholara. Système suit le réglage du téléphone.', 'Elige cómo se ve Scholara. Sistema sigue el ajuste del teléfono.', 'Scegli l’aspetto di Scholara. Sistema segue le impostazioni del telefono.', 'Wähle die Darstellung. System folgt der Telefoneinstellung.', 'Scholara’nın nasıl görüneceğini seç. Sistem, telefon ayarını izler.', '选择 Scholara 的外观。“系统”会跟随手机设置。', 'Scholaraの表示を選択します。システムは端末設定に従います。', 'Выберите вид Scholara. Системная тема следует настройке телефона.'],
+  ['System', 'Système', 'Sistema', 'Sistema', 'System', 'Sistem', '系统', 'システム', 'Система'],
+  ['Light', 'Clair', 'Claro', 'Chiaro', 'Hell', 'Açık', '浅色', 'ライト', 'Светлая'],
+  ['Dark', 'Sombre', 'Oscuro', 'Scuro', 'Dunkel', 'Koyu', '深色', 'ダーク', 'Тёмная'],
   ['Go back', 'Retour', 'Volver', 'Indietro', 'Zurück', 'Geri dön', '返回', '戻る', 'Назад'],
   ['Previous profile step', 'Étape précédente du profil', 'Paso anterior del perfil', 'Passaggio precedente del profilo', 'Vorheriger Profilschritt', 'Önceki profil adımı', '上一个个人资料步骤', '前のプロフィール手順', 'Предыдущий шаг профиля'],
   ['Send', 'Envoyer', 'Enviar', 'Invia', 'Senden', 'Gönder', '发送', '送信', 'Отправить'],

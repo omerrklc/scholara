@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Button, Card, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { NotificationBell } from '@/components/NotificationBell';
 import { fetchConversationSummaries, type ConversationSummary } from '@/services/messaging';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 const avatarColors = ['#486D62', '#6A7694', '#7A6551', '#70658B'];
@@ -41,4 +41,4 @@ export default function MessagesScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ pageHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, pageTitle: { flex: 1, minWidth: 0 }, item: { flexDirection: 'row', alignItems: 'center', gap: 12 }, avatar: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }, initials: { color: colors.white, fontWeight: '900' }, detail: { flex: 1, minWidth: 0, gap: 4 }, name: { color: colors.ink, fontWeight: '800', fontSize: 16 }, message: { color: colors.inkMuted }, unread: { color: colors.ink, fontWeight: '700' }, right: { alignItems: 'flex-end', gap: 6 }, time: { color: colors.inkMuted, fontSize: 11 }, badge: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 5, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }, badgeText: { color: colors.white, fontWeight: '800', fontSize: 11 }, empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21 }, security: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, backgroundColor: colors.primarySoft, borderRadius: 16 }, securityText: { flex: 1, color: colors.primaryDark, fontSize: 12, lineHeight: 17 } });
+const styles = createThemedStyleSheet(() => ({ pageHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, pageTitle: { flex: 1, minWidth: 0 }, item: { flexDirection: 'row', alignItems: 'center', gap: 12 }, avatar: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }, initials: { color: colors.white, fontWeight: '900' }, detail: { flex: 1, minWidth: 0, gap: 4 }, name: { color: colors.ink, fontWeight: '800', fontSize: 16 }, message: { color: colors.inkMuted }, unread: { color: colors.ink, fontWeight: '700' }, right: { alignItems: 'flex-end', gap: 6 }, time: { color: colors.inkMuted, fontSize: 11 }, badge: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 5, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }, badgeText: { color: colors.white, fontWeight: '800', fontSize: 11 }, empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21 }, security: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, backgroundColor: colors.primarySoft, borderRadius: 16 }, securityText: { flex: 1, color: colors.primaryDark, fontSize: 12, lineHeight: 17 } }));

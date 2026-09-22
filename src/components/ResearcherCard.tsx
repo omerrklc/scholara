@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import type { Researcher } from '@/types/domain';
 import type { ConnectionState } from '@/services/connections';
 import { Button, Card, Chip } from '@/components/ui';
-import { colors, radius, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, spacing } from '@/theme/tokens';
 
 export function ResearcherCard({ person, saved, connectionState, saving = false, connecting = false, onPass, onSave, onConnect, onOpenProfile, onSafety }: { person: Researcher; saved: boolean; connectionState?: ConnectionState; saving?: boolean; connecting?: boolean; onPass: () => void; onSave: () => void; onConnect: () => void; onOpenProfile: () => void; onSafety?: () => void }) {
   const connectLabel = connecting ? 'Connecting…' : connectionState === 'matched' ? 'Matched' : connectionState === 'sent' ? 'Request sent' : connectionState === 'received' ? 'Connect back' : 'Connect';
@@ -29,7 +29,7 @@ export function ResearcherCard({ person, saved, connectionState, saving = false,
   </Card>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   card: { gap: spacing.md, padding: 20 }, personRow: { flexDirection: 'row', alignItems: 'center', gap: 8 }, profileLink: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 12 }, avatar: { width: 58, height: 58, borderRadius: 20, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontSize: 19, fontWeight: '800' }, identity: { flex: 1, minWidth: 0, gap: 2 }, name: { color: colors.ink, fontSize: 20, fontWeight: '800' }, meta: { color: colors.inkMuted, fontSize: 13 }, viewProfile: { color: colors.primary, fontSize: 11, fontWeight: '800', marginTop: 2 }, right: { alignItems: 'center', gap: 2 }, score: { flexShrink: 0, alignItems: 'center', backgroundColor: colors.primarySoft, borderRadius: radius.md, paddingVertical: 9, paddingHorizontal: 10 }, scoreNumber: { color: colors.primaryDark, fontSize: 18, fontWeight: '900' }, scoreLabel: { color: colors.primary, fontSize: 8, fontWeight: '800', letterSpacing: 0.8 }, more: { width: 38, height: 30, alignItems: 'center', justifyContent: 'center' },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 5 }, location: { color: colors.inkMuted, fontSize: 13 }, moving: { flexDirection: 'row', gap: 8, padding: 11, backgroundColor: colors.primarySoft, borderRadius: radius.md }, movingText: { flex: 1, color: colors.primaryDark, fontWeight: '700', fontSize: 13 }, tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 }, research: { color: colors.ink, fontSize: 16, lineHeight: 24 }, matchReason: { backgroundColor: '#F7F1E4', borderRadius: radius.md, padding: 14, gap: 5 }, reasonLabel: { color: '#8D651B', fontSize: 10, fontWeight: '900', letterSpacing: 1 }, reason: { color: colors.ink, fontSize: 14, lineHeight: 20 }, intent: { color: colors.inkMuted, fontSize: 13, fontWeight: '600' }, actions: { flexDirection: 'row', alignItems: 'center', gap: 10 }, roundButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, saved: { backgroundColor: colors.primarySoft, borderColor: '#A8CFC1' }, busy: { opacity: 0.5 }, connect: { flex: 1 },
-});
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 5 }, location: { color: colors.inkMuted, fontSize: 13 }, moving: { flexDirection: 'row', gap: 8, padding: 11, backgroundColor: colors.primarySoft, borderRadius: radius.md }, movingText: { flex: 1, color: colors.primaryDark, fontWeight: '700', fontSize: 13 }, tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 }, research: { color: colors.ink, fontSize: 16, lineHeight: 24 }, matchReason: { backgroundColor: colors.warmSurface, borderRadius: radius.md, padding: 14, gap: 5 }, reasonLabel: { color: colors.warmText, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, reason: { color: colors.ink, fontSize: 14, lineHeight: 20 }, intent: { color: colors.inkMuted, fontSize: 13, fontWeight: '600' }, actions: { flexDirection: 'row', alignItems: 'center', gap: 10 }, roundButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }, saved: { backgroundColor: colors.primarySoft, borderColor: colors.selectedBorder }, busy: { opacity: 0.5 }, connect: { flex: 1 },
+}));

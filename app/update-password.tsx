@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { BrandMark, Button, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import { publicAuthError } from '@/services/authErrors';
 import { supabase } from '@/services/supabase';
-import { spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, spacing } from '@/theme/tokens';
 
 export default function UpdatePasswordScreen() {
   const [password, setPassword] = useState('');
@@ -42,4 +42,4 @@ export default function UpdatePasswordScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ container: { gap: spacing.lg }, form: { gap: spacing.md } });
+const styles = createThemedStyleSheet(() => ({ container: { gap: spacing.lg }, form: { gap: spacing.md } }));

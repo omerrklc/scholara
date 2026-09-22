@@ -6,17 +6,17 @@ import { AppProvider } from '@/state/AppProvider';
 import { PushNotificationObserver } from '@/components/PushNotificationObserver';
 import { colors } from '@/theme/tokens';
 import { I18nProvider } from '@/i18n';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
 export default function RootLayout() {
   return <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
-      <I18nProvider>
-        <AppProvider>
-          <PushNotificationObserver />
-          <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: 'fade' }} />
-        </AppProvider>
-      </I18nProvider>
+      <ThemeProvider><I18nProvider><AppProvider><AppNavigation /></AppProvider></I18nProvider></ThemeProvider>
     </SafeAreaProvider>
   </GestureHandlerRootView>;
+}
+
+function AppNavigation() {
+  const { resolvedTheme } = useTheme();
+  return <><PushNotificationObserver /><StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} /><Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: 'fade' }} /></>;
 }

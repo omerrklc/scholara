@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { SafetySheet } from '@/components/SafetySheet';
 import { Button, Card, Chip, MessageBanner, Screen } from '@/components/ui';
@@ -9,7 +9,7 @@ import { setSavedProfile, type ConnectionState } from '@/services/connections';
 import { toResearcher } from '@/services/discovery';
 import { fetchProfileDetail, type ProfileDetail } from '@/services/profileDetails';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import type { DiscoveryMode } from '@/types/domain';
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -114,6 +114,6 @@ function Info({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: stri
   return <View style={styles.info}><Ionicons name={icon} size={19} color={colors.primary} /><Text style={styles.infoText}>{text}</Text></View>;
 }
 
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, headerTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' }, iconButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, iconButtonPlaceholder: { width: 42, height: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.md }, hero: { alignItems: 'center', gap: 4, paddingVertical: spacing.sm }, avatar: { width: 112, height: 112, borderRadius: 38, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: spacing.sm }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontSize: 32, fontWeight: '900' }, name: { color: colors.ink, fontSize: 27, fontWeight: '900', textAlign: 'center' }, username: { color: colors.primary, fontWeight: '800' }, academic: { color: colors.ink, fontWeight: '700', marginTop: spacing.xs }, university: { color: colors.ink, textAlign: 'center' }, muted: { color: colors.inkMuted, textAlign: 'center', lineHeight: 20 }, unavailable: { color: colors.ink, fontSize: 20, fontWeight: '800' }, section: { gap: spacing.md }, sectionLabel: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 1.1 }, body: { color: colors.ink, fontSize: 15, lineHeight: 22 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, matchCard: { gap: spacing.sm, backgroundColor: '#F7F1E4', borderColor: '#E8D8B4' }, matchTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, score: { color: colors.primaryDark, fontSize: 24, fontWeight: '900' }, info: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, infoText: { flex: 1, color: colors.ink, lineHeight: 20 }, actions: { gap: spacing.sm }, messageHint: { color: colors.inkMuted, fontSize: 12, textAlign: 'center', marginTop: -spacing.xs, marginBottom: spacing.md },
-});
+const styles = createThemedStyleSheet(() => ({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, headerTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' }, iconButton: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, iconButtonPlaceholder: { width: 42, height: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.md }, hero: { alignItems: 'center', gap: 4, paddingVertical: spacing.sm }, avatar: { width: 112, height: 112, borderRadius: 38, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: spacing.sm }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontSize: 32, fontWeight: '900' }, name: { color: colors.ink, fontSize: 27, fontWeight: '900', textAlign: 'center' }, username: { color: colors.primary, fontWeight: '800' }, academic: { color: colors.ink, fontWeight: '700', marginTop: spacing.xs }, university: { color: colors.ink, textAlign: 'center' }, muted: { color: colors.inkMuted, textAlign: 'center', lineHeight: 20 }, unavailable: { color: colors.ink, fontSize: 20, fontWeight: '800' }, section: { gap: spacing.md }, sectionLabel: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 1.1 }, body: { color: colors.ink, fontSize: 15, lineHeight: 22 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, matchCard: { gap: spacing.sm, backgroundColor: colors.warmSurface, borderColor: colors.warmBorder }, matchTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, score: { color: colors.primaryDark, fontSize: 24, fontWeight: '900' }, info: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, infoText: { flex: 1, color: colors.ink, lineHeight: 20 }, actions: { gap: spacing.sm }, messageHint: { color: colors.inkMuted, fontSize: 12, textAlign: 'center', marginTop: -spacing.xs, marginBottom: spacing.md },
+}));

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommunityCommentsModal, CommunityComposerModal } from '@/components/CommunityModals';
@@ -10,7 +10,7 @@ import { SafetySheet } from '@/components/SafetySheet';
 import { Button, Card, Chip, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { deleteCommunityPost, fetchCommunityPosts, toggleCommunityHelpful, type CommunityCategory, type CommunityPost } from '@/services/community';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 type FeedFilter = CommunityCategory | 'all';
@@ -129,6 +129,6 @@ export default function CommunityScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   screen: { paddingBottom: 0 }, list: { gap: spacing.md, paddingBottom: spacing.xl }, emptyList: { flexGrow: 1 }, header: { gap: spacing.md, marginBottom: spacing.md }, titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, titleContent: { flex: 1, minWidth: 0 }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, prompt: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 18, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.primary, backgroundColor: colors.surface }, promptText: { flex: 1, color: colors.inkMuted }, pressed: { opacity: 0.7 }, disabled: { opacity: 0.5 }, empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 20 }, post: { gap: spacing.md, marginBottom: spacing.md }, postHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs }, avatar: { width: 42, height: 42, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' }, avatarText: { color: colors.primaryDark, fontWeight: '900' }, postIdentity: { flex: 1, minWidth: 0 }, author: { color: colors.ink, fontWeight: '800' }, context: { color: colors.inkMuted, fontSize: 10 }, more: { width: 36, height: 40, alignItems: 'center', justifyContent: 'center' }, topic: { alignItems: 'flex-start' }, body: { color: colors.ink, fontSize: 15, lineHeight: 22 }, stats: { flexDirection: 'row', gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, statButton: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: 13 }, stat: { color: colors.inkMuted, fontSize: 12, fontWeight: '700' }, helpful: { backgroundColor: colors.primarySoft }, helpfulText: { color: colors.primaryDark }, confirmOverlay: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: 'rgba(11, 31, 24, 0.45)' }, confirmCard: { width: '100%', maxWidth: 420, gap: spacing.md }, confirmTitle: { color: colors.ink, fontSize: 19, fontWeight: '900' },
-});
+}));

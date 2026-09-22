@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, useWindowDimensions, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { BrandMark, Button, Card, Screen } from '@/components/ui';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 
 export default function WelcomeScreen() {
   const { height, width } = useWindowDimensions();
@@ -43,7 +43,7 @@ export default function WelcomeScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   loading: { alignItems: 'center', justifyContent: 'center' },
   container: { minHeight: '100%', justifyContent: 'space-between', paddingTop: spacing.md, paddingBottom: spacing.xl }, containerCompact: { gap: spacing.md, paddingBottom: spacing.sm }, hero: { alignItems: 'center', gap: 14 }, heroCompact: { gap: 9 }, orbit: { width: 116, height: 116, borderRadius: 58, borderWidth: 1, borderColor: '#B8D7CB', backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 4 }, orbitCompact: { width: 76, height: 76, borderRadius: 38 }, orbitGlyph: { color: colors.primary, fontSize: 48, fontWeight: '900', letterSpacing: -3 }, dot: { position: 'absolute', width: 13, height: 13, borderRadius: 7, backgroundColor: colors.accent }, dotOne: { top: 8, right: 17 }, dotTwo: { bottom: 11, left: 10, backgroundColor: '#7C6D9B' }, kicker: { color: colors.primary, fontWeight: '800', fontSize: 11, letterSpacing: 1.3, textAlign: 'center' }, headline: { color: colors.ink, fontSize: 38, lineHeight: 43, fontWeight: '900', letterSpacing: -1.5, textAlign: 'center', maxWidth: '100%' }, headlineCompact: { fontSize: 29, lineHeight: 33 }, body: { color: colors.inkMuted, fontSize: 16, lineHeight: 24, textAlign: 'center', maxWidth: 420 }, valueCard: { gap: 12, marginVertical: spacing.md }, valueCardCompact: { gap: 8, marginVertical: 0, paddingVertical: 12 }, value: { flexDirection: 'row', alignItems: 'center', gap: 10 }, valueDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary }, valueText: { color: colors.ink, fontWeight: '600', fontSize: 14 }, actions: { gap: 8 },
-});
+}));

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Redirect, router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Button, Card, Chip, Field, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import {
@@ -16,7 +16,7 @@ import {
   type ModerationStatus,
 } from '@/services/moderationAdmin';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 const filters: { label: string; value: ModerationStatus }[] = [
@@ -237,6 +237,6 @@ function EvidenceRow({ label, value }: { label: string; value: string }) {
   return <View style={styles.evidenceRow}><Text style={styles.evidenceLabel}>{label}</Text><Text style={styles.evidenceValue}>{value}</Text></View>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, back: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, headerTitle: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: '900', textAlign: 'center' }, headerSpacer: { width: 42 }, center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm }, roleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, borderRadius: 999, backgroundColor: colors.primarySoft }, roleText: { color: colors.primaryDark, fontSize: 12, fontWeight: '800' }, filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, report: { gap: spacing.sm }, reportHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, reportTitleWrap: { flex: 1, minWidth: 0, gap: 2 }, reportName: { color: colors.ink, fontSize: 17, fontWeight: '900' }, username: { color: colors.primary, fontSize: 12, fontWeight: '700' }, meta: { color: colors.inkMuted, fontSize: 11 }, reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, labeledText: { gap: 4, paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, label: { color: colors.inkMuted, fontSize: 10, fontWeight: '900', letterSpacing: 0.8 }, body: { color: colors.ink, fontSize: 14, lineHeight: 20 }, review: { gap: spacing.sm, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }, banDuration: { gap: spacing.xs, padding: spacing.sm, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceMuted }, durationHint: { color: colors.inkMuted, fontSize: 11, lineHeight: 16 }, evidenceCard: { gap: spacing.xs, backgroundColor: colors.surfaceMuted, shadowOpacity: 0, elevation: 0 }, evidenceTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xs }, evidenceHeading: { color: colors.ink, fontWeight: '900' }, evidenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, evidenceLabel: { flex: 1, minWidth: 0, color: colors.inkMuted, fontSize: 12 }, evidenceValue: { color: colors.ink, fontWeight: '900' }, guidance: { color: colors.primaryDark, fontSize: 12, lineHeight: 18, fontWeight: '700', paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border }, counter: { alignSelf: 'flex-end', color: colors.inkMuted, fontSize: 10, marginTop: -spacing.xs, textAlign: 'right' }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '900', textAlign: 'center' }, emptyText: { color: colors.inkMuted, lineHeight: 20, textAlign: 'center' },
-});
+}));

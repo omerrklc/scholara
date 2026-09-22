@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, type Href, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { Button, Card, Chip, Field, MessageBanner, PasswordField, Screen, SectionTitle } from '@/components/ui';
 import {
@@ -11,16 +11,21 @@ import {
 } from '@/services/accountSettings';
 import { openNotificationSettings } from '@/services/pushNotifications';
 import { useApp } from '@/state/AppProvider';
-import { colors, radius, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, spacing } from '@/theme/tokens';
 import { appLanguages, useI18n } from '@/i18n';
+import { useTheme, type ThemePreference } from '@/theme/ThemeProvider';
 
 const legalLabels: Record<LegalDocumentKey, string> = {
   terms: 'Terms of Service', privacy: 'Privacy Notice', community_guidelines: 'Community Guidelines',
 };
+const themeOptions: { label: string; value: ThemePreference }[] = [
+  { label: 'System', value: 'system' }, { label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' },
+];
 
 export default function SettingsScreen() {
   const { enablePushNotifications, profile, pushRegistrationState, session, updateProfile } = useApp();
   const { language, setLanguage } = useI18n();
+  const { preference, setPreference } = useTheme();
   const [notifications, setNotifications] = useState(defaultAccountSettings.notifications);
   const [privacy, setPrivacy] = useState(defaultAccountSettings.privacy);
   const [legal, setLegal] = useState(defaultAccountSettings.legal);
@@ -95,6 +100,11 @@ export default function SettingsScreen() {
           <View accessibilityRole="radiogroup" style={styles.languages}>{appLanguages.map((item) => <Chip key={item.code} label={item.label} selected={language === item.code} onPress={() => void setLanguage(item.code)} />)}</View>
         </SettingsCard>
 
+        <SettingsCard title="APPEARANCE" icon="contrast-outline">
+          <Text style={styles.body}>Choose how Scholara looks. System follows your phone setting.</Text>
+          <View accessibilityRole="radiogroup" style={styles.languages}>{themeOptions.map((item) => <Chip key={item.value} label={item.label} selected={preference === item.value} onPress={() => void setPreference(item.value)} />)}</View>
+        </SettingsCard>
+
         <SettingsCard title="PRIVACY" icon="lock-closed-outline">
           <ToggleRow label="Show current city" detail="Other researchers can see your current city and country." value={privacy.currentLocation} onChange={(value) => setPrivacy((current) => ({ ...current, currentLocation: value }))} />
           <ToggleRow label="Show moving destination" detail="Only applies when you are planning a move." value={privacy.relocationDestination} disabled={!profile.isRelocating} onChange={(value) => setPrivacy((current) => ({ ...current, relocationDestination: value }))} />
@@ -163,12 +173,12 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
   return <Modal animationType="fade" onRequestClose={onClose} transparent visible><KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalBackdrop}><View style={styles.modalCard}><Text style={styles.modalTitle}>Permanently delete account?</Text><Text style={styles.body}>Type DELETE and enter your password. Your account data will be removed immediately.</Text>{error ? <MessageBanner message={error} /> : null}<Field label="Type DELETE to confirm" autoCapitalize="characters" maxLength={6} value={confirmation} onChangeText={setConfirmation} /><PasswordField label="Current password" autoComplete="current-password" maxLength={128} value={password} onChangeText={setPassword} /><Button label={loading ? 'Deleting…' : 'Permanently delete'} variant="danger" disabled={confirmation !== 'DELETE' || !password || loading} onPress={() => void remove()} /><Button label="Cancel" variant="ghost" disabled={loading} onPress={onClose} /></View></KeyboardAvoidingView></Modal>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, back: { width: 42, height: 42, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }, headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, headerSpacer: { width: 42 },
-  card: { gap: spacing.md }, dangerCard: { borderColor: '#E8B9B9' }, cardTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, label: { color: colors.primaryDark, fontSize: 11, fontWeight: '900', letterSpacing: 1.1 }, dangerText: { color: colors.danger },
+  card: { gap: spacing.md }, dangerCard: { borderColor: colors.errorBorder }, cardTitle: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm }, label: { color: colors.primaryDark, fontSize: 11, fontWeight: '900', letterSpacing: 1.1 }, dangerText: { color: colors.danger },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs }, documentText: { flex: 1, minWidth: 0, gap: 3 }, rowTitle: { color: colors.ink, fontSize: 15, fontWeight: '700' }, rowDetail: { color: colors.inkMuted, fontSize: 12, lineHeight: 17 }, toggle: { width: 48, height: 28, padding: 3, borderRadius: 14, backgroundColor: colors.border }, toggleOn: { backgroundColor: colors.primary }, knob: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.white }, knobOn: { alignSelf: 'flex-end' }, disabled: { opacity: 0.45 },
   pushStatus: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.xs },
   languages: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   documentRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, minHeight: 48, borderTopWidth: 1, borderTopColor: colors.border }, consent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm }, consentText: { flex: 1, color: colors.ink, lineHeight: 20 }, body: { color: colors.inkMuted, lineHeight: 21 }, status: { color: colors.primaryDark, fontWeight: '700', textTransform: 'capitalize' },
   modalBackdrop: { flex: 1, padding: spacing.lg, backgroundColor: 'rgba(9,25,20,0.55)', justifyContent: 'center' }, modalCard: { alignSelf: 'center', width: '100%', maxWidth: 480, gap: spacing.md, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.lg }, modalTitle: { color: colors.ink, fontSize: 23, fontWeight: '900' },
-});
+}));

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { ResearcherCard } from '@/components/ResearcherCard';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -9,7 +9,7 @@ import { SafetySheet } from '@/components/SafetySheet';
 import { BrandMark, Button, Card, MessageBanner, Screen, SectionTitle, SegmentedControl } from '@/components/ui';
 import { fetchDiscoveryProfiles, rankResearchers } from '@/services/discovery';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import type { DiscoveryMode, Profile, Researcher } from '@/types/domain';
 
 type DiscoveryProfile = Profile & { id: string };
@@ -98,4 +98,4 @@ export default function DiscoverScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }, headerText: { flex: 1, minWidth: 0 }, greeting: { color: colors.inkMuted, fontSize: 12 }, question: { color: colors.ink, fontSize: 18, fontWeight: '800' }, state: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, stateTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', textAlign: 'center' }, stateText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21, marginBottom: spacing.xs }, note: { textAlign: 'center', color: colors.inkMuted, fontSize: 11, lineHeight: 16, paddingHorizontal: spacing.lg } });
+const styles = createThemedStyleSheet(() => ({ header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 2 }, headerText: { flex: 1, minWidth: 0 }, greeting: { color: colors.inkMuted, fontSize: 12 }, question: { color: colors.ink, fontSize: 18, fontWeight: '800' }, state: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }, stateTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', textAlign: 'center' }, stateText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21, marginBottom: spacing.xs }, note: { textAlign: 'center', color: colors.inkMuted, fontSize: 11, lineHeight: 16, paddingHorizontal: spacing.lg } }));

@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { SafetySheet } from '@/components/SafetySheet';
 import { NotificationBell } from '@/components/NotificationBell';
 import { Button, Card, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { fetchDiscoveryProfiles, rankResearchers } from '@/services/discovery';
 import { useApp } from '@/state/AppProvider';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 import type { Profile, Researcher } from '@/types/domain';
 
@@ -75,4 +75,4 @@ export default function MatchesScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ pageHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, pageTitle: { flex: 1, minWidth: 0 }, empty: { alignItems: 'center', gap: 10, paddingVertical: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21 }, match: { flexDirection: 'row', alignItems: 'center', gap: 8 }, profileLink: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 }, avatar: { width: 50, height: 50, borderRadius: 17, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontWeight: '900' }, detail: { flex: 1, minWidth: 0, gap: 3 }, name: { color: colors.ink, fontWeight: '800', fontSize: 16 }, meta: { color: colors.inkMuted, fontSize: 12 }, viewProfile: { color: colors.primary, fontSize: 10, fontWeight: '800' }, accept: { width: 122 }, more: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' } });
+const styles = createThemedStyleSheet(() => ({ pageHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }, pageTitle: { flex: 1, minWidth: 0 }, empty: { alignItems: 'center', gap: 10, paddingVertical: spacing.xl }, emptyTitle: { color: colors.ink, fontSize: 18, fontWeight: '800' }, emptyText: { color: colors.inkMuted, textAlign: 'center', lineHeight: 21 }, match: { flexDirection: 'row', alignItems: 'center', gap: 8 }, profileLink: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 }, avatar: { width: 50, height: 50, borderRadius: 17, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, avatarImage: { width: '100%', height: '100%' }, initials: { color: colors.white, fontWeight: '900' }, detail: { flex: 1, minWidth: 0, gap: 3 }, name: { color: colors.ink, fontWeight: '800', fontSize: 16 }, meta: { color: colors.inkMuted, fontSize: 12 }, viewProfile: { color: colors.primary, fontSize: 10, fontWeight: '800' }, accept: { width: 122 }, more: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' } }));

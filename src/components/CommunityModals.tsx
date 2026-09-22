@@ -10,7 +10,7 @@ import {
   type CommunityCategory, type CommunityComment, type CommunityPost,
 } from '@/services/community';
 import { buildCommentThread } from '@/services/communityThread';
-import { colors, radius, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 const categories: { value: CommunityCategory; label: string }[] = [
@@ -183,7 +183,7 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
   </Modal>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   safe: { flex: 1, backgroundColor: colors.background },
   flex: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.xl },
   emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' },
   comment: { position: 'relative', flexDirection: 'row', paddingTop: spacing.md },
-  threadLine: { width: 2, alignSelf: 'stretch', marginHorizontal: 8, borderRadius: 1, backgroundColor: '#C8D8D2' },
+  threadLine: { width: 2, alignSelf: 'stretch', marginHorizontal: 8, borderRadius: 1, backgroundColor: colors.rail },
   commentMain: { flex: 1, minWidth: 0, gap: spacing.xs, paddingBottom: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
   commentHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   commentAvatar: { width: 32, height: 32, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   commentActionText: { color: colors.inkMuted, fontSize: 11, fontWeight: '800' },
   deleteText: { color: colors.danger },
   repliesToggle: { minHeight: 38, flexDirection: 'row', alignItems: 'center', gap: spacing.xs, alignSelf: 'flex-start', paddingRight: spacing.sm },
-  repliesRail: { width: 18, height: 2, borderRadius: 1, backgroundColor: '#A8CFC1' },
+  repliesRail: { width: 18, height: 2, borderRadius: 1, backgroundColor: colors.selectedBorder },
   repliesToggleText: { color: colors.primaryDark, fontSize: 11, fontWeight: '900' },
   composer: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.xs, paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
   replyingBanner: { minHeight: 42, flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingLeft: spacing.sm, borderLeftWidth: 3, borderLeftColor: colors.primary, backgroundColor: colors.primarySoft },
@@ -239,4 +239,4 @@ const styles = StyleSheet.create({
   confirmOverlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: 'rgba(11, 31, 24, 0.45)' },
   confirmCard: { width: '100%', maxWidth: 420, gap: spacing.md },
   confirmTitle: { color: colors.ink, fontSize: 19, fontWeight: '900' },
-});
+}));

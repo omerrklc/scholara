@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, StyleSheet, Text, TextInput, TextInputProps, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleProp, Text, TextInput, TextInputProps, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, shadow, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, shadow, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
 
 export function Screen({ children, scroll = true, style }: PropsWithChildren<{ scroll?: boolean; style?: StyleProp<ViewStyle> }>) {
   const { height, width } = useWindowDimensions();
@@ -45,10 +46,11 @@ export function Chip({ label, selected = false, onPress }: { label: string; sele
 
 export function Field({ label, multiline = false, accessory, style, ...props }: TextInputProps & { label: string; accessory?: ReactNode }) {
   const { t } = useI18n();
+  const { resolvedTheme } = useTheme();
   return <View style={styles.fieldWrap}>
     <Text maxFontSizeMultiplier={1.3} style={styles.label}>{t(label)}</Text>
     <View style={styles.inputWrap}>
-      <TextInput accessibilityLabel={t(label)} maxFontSizeMultiplier={1.3} placeholderTextColor="#8C9691" multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined, style]} {...props} placeholder={typeof props.placeholder === 'string' ? t(props.placeholder) : props.placeholder} />
+      <TextInput accessibilityLabel={t(label)} keyboardAppearance={resolvedTheme} maxFontSizeMultiplier={1.3} placeholderTextColor={colors.placeholder} multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined, style]} {...props} placeholder={typeof props.placeholder === 'string' ? t(props.placeholder) : props.placeholder} />
       {accessory ? <View style={styles.inputAccessory}>{accessory}</View> : null}
     </View>
   </View>;
@@ -92,14 +94,14 @@ export function MessageBanner({ message, tone = 'error' }: { message: string; to
   return <View accessibilityRole="alert" style={[styles.banner, styles[`banner_${tone}`]]}><Text style={[styles.bannerText, styles[`bannerText_${tone}`]]}>{visibleMessage}</Text></View>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   safe: { flex: 1, backgroundColor: colors.background }, keyboard: { flex: 1, width: '100%' }, scrollView: { flex: 1, width: '100%' }, scroll: { flexGrow: 1, width: '100%', alignItems: 'center' }, screenContent: { boxSizing: 'border-box', flexGrow: 1, width: '100%', maxWidth: 560, minWidth: 0, padding: spacing.lg, gap: spacing.md }, screenContentCompact: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, gap: spacing.sm },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 10 }, brandIcon: { width: 34, height: 34, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }, brandGlyph: { color: colors.white, fontWeight: '800', fontSize: 18 }, brand: { color: colors.ink, fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
   button: { minHeight: 52, borderRadius: radius.md, paddingHorizontal: 20, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, borderWidth: 1 }, button_primary: { backgroundColor: colors.primary, borderColor: colors.primary }, button_secondary: { backgroundColor: colors.surface, borderColor: colors.border }, button_ghost: { backgroundColor: 'transparent', borderColor: 'transparent' }, button_danger: { backgroundColor: colors.danger, borderColor: colors.danger }, buttonText: { fontSize: 16, fontWeight: '700' }, buttonText_primary: { color: colors.white }, buttonText_secondary: { color: colors.ink }, buttonText_ghost: { color: colors.primary }, buttonText_danger: { color: colors.white }, pressed: { opacity: 0.75 }, disabled: { opacity: 0.45 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md, ...shadow },
-  chip: { borderRadius: radius.pill, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: 'transparent' }, chipSelected: { backgroundColor: colors.primarySoft, borderColor: '#A8CFC1' }, chipText: { color: colors.inkMuted, fontSize: 13, fontWeight: '600' }, chipTextSelected: { color: colors.primaryDark },
+  chip: { borderRadius: radius.pill, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.surfaceMuted, borderWidth: 1, borderColor: 'transparent' }, chipSelected: { backgroundColor: colors.primarySoft, borderColor: colors.selectedBorder }, chipText: { color: colors.inkMuted, fontSize: 13, fontWeight: '600' }, chipTextSelected: { color: colors.primaryDark },
   fieldWrap: { gap: 7, minWidth: 0 }, label: { color: colors.ink, fontSize: 14, fontWeight: '700' }, inputWrap: { width: '100%', minWidth: 0 }, input: { width: '100%', minHeight: 52, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 15, color: colors.ink, fontSize: 16 }, inputWithAccessory: { paddingRight: 54 }, inputAccessory: { position: 'absolute', right: 5, top: 0, bottom: 0, justifyContent: 'center' }, passwordToggle: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22 }, textarea: { minHeight: 132, paddingTop: 14 },
   segment: { flexDirection: 'row', backgroundColor: colors.surfaceMuted, padding: 4, borderRadius: radius.md }, segmentItem: { flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center' }, segmentActive: { backgroundColor: colors.surface, ...shadow }, segmentText: { color: colors.inkMuted, fontWeight: '700' }, segmentTextActive: { color: colors.primaryDark },
   titleWrap: { gap: 7, marginBottom: 4 }, titleWrapCompact: { gap: 4, marginBottom: 0 }, eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '800', letterSpacing: 1.2, textTransform: 'uppercase' }, title: { color: colors.ink, fontSize: 30, lineHeight: 35, fontWeight: '800', letterSpacing: -1 }, titleCompact: { fontSize: 25, lineHeight: 30, letterSpacing: -0.6 }, subtitle: { color: colors.inkMuted, fontSize: 16, lineHeight: 23 }, subtitleCompact: { fontSize: 14, lineHeight: 20 },
-  banner: { borderRadius: radius.md, padding: 13, borderWidth: 1 }, banner_error: { backgroundColor: '#FBECEC', borderColor: '#E8B9B9' }, banner_success: { backgroundColor: colors.primarySoft, borderColor: '#A8CFC1' }, banner_info: { backgroundColor: '#EDF2F7', borderColor: '#C9D5E1' }, bannerText: { fontSize: 13, lineHeight: 19, fontWeight: '600' }, bannerText_error: { color: colors.danger }, bannerText_success: { color: colors.primaryDark }, bannerText_info: { color: colors.ink },
-});
+  banner: { borderRadius: radius.md, padding: 13, borderWidth: 1 }, banner_error: { backgroundColor: colors.errorSurface, borderColor: colors.errorBorder }, banner_success: { backgroundColor: colors.primarySoft, borderColor: colors.selectedBorder }, banner_info: { backgroundColor: colors.infoSurface, borderColor: colors.infoBorder }, bannerText: { fontSize: 13, lineHeight: 19, fontWeight: '600' }, bannerText_error: { color: colors.danger }, bannerText_success: { color: colors.primaryDark }, bannerText_info: { color: colors.ink },
+}));

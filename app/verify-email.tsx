@@ -2,13 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Text } from '@/components/LocalizedText';
 import { BrandMark, Button, Card, MessageBanner, Screen, SectionTitle } from '@/components/ui';
 import { getAuthRedirectUrl } from '@/services/auth';
 import { publicAuthError } from '@/services/authErrors';
 import { supabase } from '@/services/supabase';
-import { colors, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 export default function VerifyEmailScreen() {
@@ -58,11 +58,11 @@ export default function VerifyEmailScreen() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({
+const styles = createThemedStyleSheet(() => ({
   container: { gap: spacing.lg },
   iconWrap: { width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', alignSelf: 'center' },
   note: { gap: spacing.xs },
   noteTitle: { color: colors.ink, fontSize: 15, fontWeight: '800' },
   noteText: { color: colors.inkMuted, fontSize: 14, lineHeight: 20 },
   actions: { gap: spacing.sm, marginTop: 'auto' },
-});
+}));

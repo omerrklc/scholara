@@ -5,7 +5,7 @@ import { Text } from '@/components/LocalizedText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockUser, reportCommunityComment, reportCommunityPost, reportUser, type ReportReason, type SafetySource } from '@/services/moderation';
 import { Button, Chip, Field, MessageBanner } from '@/components/ui';
-import { colors, radius, shadow, spacing } from '@/theme/tokens';
+import { createThemedStyleSheet, colors, radius, shadow, spacing } from '@/theme/tokens';
 import { useI18n } from '@/i18n';
 
 const reasons: { value: ReportReason; label: string }[] = [
@@ -85,6 +85,6 @@ export function SafetySheet({ targetId, targetName, source, contextPostId, conte
   </Modal>;
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end' }, backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(11, 31, 24, 0.45)' }, keyboard: { maxHeight: '92%' }, sheet: { maxHeight: '100%', backgroundColor: colors.background, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingTop: spacing.md, ...shadow }, header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }, eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, title: { color: colors.ink, fontSize: 20, fontWeight: '800', maxWidth: 280 }, close: { width: 44, height: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, content: { padding: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xl, gap: spacing.md }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' }, note: { color: colors.inkMuted, fontSize: 13, lineHeight: 19 }, reasons: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, counter: { color: colors.inkMuted, fontSize: 10, textAlign: 'right', marginTop: -spacing.sm }, divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs }, confirm: { gap: spacing.sm, padding: spacing.md, backgroundColor: '#FBECEC', borderRadius: radius.md }, confirmText: { color: colors.danger, fontWeight: '700', lineHeight: 20 },
-});
+const styles = createThemedStyleSheet(() => ({
+  overlay: { flex: 1, justifyContent: 'flex-end' }, backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(11, 31, 24, 0.45)' }, keyboard: { maxHeight: '92%' }, sheet: { maxHeight: '100%', backgroundColor: colors.background, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingTop: spacing.md, ...shadow }, header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }, eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }, title: { color: colors.ink, fontSize: 20, fontWeight: '800', maxWidth: 280 }, close: { width: 44, height: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceMuted }, content: { padding: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xl, gap: spacing.md }, sectionTitle: { color: colors.ink, fontSize: 17, fontWeight: '800' }, note: { color: colors.inkMuted, fontSize: 13, lineHeight: 19 }, reasons: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }, counter: { color: colors.inkMuted, fontSize: 10, textAlign: 'right', marginTop: -spacing.sm }, divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.xs }, confirm: { gap: spacing.sm, padding: spacing.md, backgroundColor: colors.errorSurface, borderRadius: radius.md }, confirmText: { color: colors.danger, fontWeight: '700', lineHeight: 20 },
+}));

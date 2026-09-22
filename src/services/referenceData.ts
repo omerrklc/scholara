@@ -1,10 +1,18 @@
 import countries from 'i18n-iso-countries';
 import en from 'i18n-iso-countries/langs/en.json';
+import de from 'i18n-iso-countries/langs/de.json';
+import es from 'i18n-iso-countries/langs/es.json';
+import fr from 'i18n-iso-countries/langs/fr.json';
+import it from 'i18n-iso-countries/langs/it.json';
+import ja from 'i18n-iso-countries/langs/ja.json';
+import ru from 'i18n-iso-countries/langs/ru.json';
 import tr from 'i18n-iso-countries/langs/tr.json';
+import zh from 'i18n-iso-countries/langs/zh.json';
 import { supabase } from '@/services/supabase';
 
-countries.registerLocale(en);
-countries.registerLocale(tr);
+[en, fr, es, it, de, tr, zh, ja, ru].forEach((locale) => countries.registerLocale(locale));
+
+export type ReferenceLanguage = 'en' | 'fr' | 'es' | 'it' | 'de' | 'tr' | 'zh' | 'ja' | 'ru';
 
 export type CountryOption = { code: string; name: string };
 export type InstitutionOption = {
@@ -14,7 +22,7 @@ export type CityOption = {
   id: string; name: string; admin1: string; countryCode: string; countryName: string; label: string; source: 'geonames';
 };
 
-export function getCountryOptions(locale: 'en' | 'tr' = 'en'): CountryOption[] {
+export function getCountryOptions(locale: ReferenceLanguage = 'en'): CountryOption[] {
   return Object.entries(countries.getNames(locale, { select: 'official' }))
     .map(([code, name]) => ({ code, name }))
     .sort((left, right) => left.name.localeCompare(right.name, locale));
@@ -57,10 +65,10 @@ async function search<T>(body: Record<string, string>, parse: (value: unknown) =
   return { results: values.map(parse).filter((item): item is T => Boolean(item)), error: null };
 }
 
-export function searchInstitutions(query: string, countryCode?: string) {
-  return search({ type: 'institutions', query, ...(countryCode ? { countryCode } : {}), language: 'en' }, institution);
+export function searchInstitutions(query: string, countryCode?: string, language: ReferenceLanguage = 'en') {
+  return search({ type: 'institutions', query, ...(countryCode ? { countryCode } : {}), language }, institution);
 }
 
-export function searchCities(query: string, countryCode: string) {
-  return search({ type: 'cities', query, countryCode, language: 'en' }, city);
+export function searchCities(query: string, countryCode: string, language: ReferenceLanguage = 'en') {
+  return search({ type: 'cities', query, countryCode, language }, city);
 }

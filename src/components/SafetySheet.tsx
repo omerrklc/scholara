@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { blockUser, reportCommunityComment, reportCommunityPost, reportUser, type ReportReason, type SafetySource } from '@/services/moderation';
 import { Button, Chip, Field, MessageBanner } from '@/components/ui';
 import { colors, radius, shadow, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 const reasons: { value: ReportReason; label: string }[] = [
   { value: 'spam', label: 'Spam' },
@@ -17,6 +18,7 @@ const reasons: { value: ReportReason; label: string }[] = [
 ];
 
 export function SafetySheet({ targetId, targetName, source, contextPostId, contextCommentId, onClose, onBlocked }: { targetId: string; targetName: string; source: SafetySource; contextPostId?: string; contextCommentId?: string; onClose: () => void; onBlocked: () => void }) {
+  const { t } = useI18n();
   const [selectedReasons, setSelectedReasons] = useState<ReportReason[]>([]);
   const [details, setDetails] = useState('');
   const [confirmingBlock, setConfirmingBlock] = useState(false);
@@ -74,7 +76,7 @@ export function SafetySheet({ targetId, targetName, source, contextPostId, conte
               <View style={styles.divider} />
               <Text style={styles.sectionTitle}>Block user</Text>
               <Text style={styles.note}>You will disappear from each other’s Discover, Matches and Messages. Your existing conversation is kept securely but neither of you can access it while blocked.</Text>
-              {confirmingBlock ? <View style={styles.confirm}><Text style={styles.confirmText}>Block {targetName}? This also removes the match.</Text><Button label={busy ? 'Blocking…' : 'Yes, block user'} disabled={busy} onPress={() => void confirmBlock()} /><Button label="Cancel" variant="ghost" disabled={busy} onPress={() => setConfirmingBlock(false)} /></View> : <Button label="Block user" variant="secondary" onPress={() => setConfirmingBlock(true)} />}
+              {confirmingBlock ? <View style={styles.confirm}><Text style={styles.confirmText}>{t('Block {{name}}? This also removes the match.', { name: targetName })}</Text><Button label={busy ? 'Blocking…' : 'Yes, block user'} disabled={busy} onPress={() => void confirmBlock()} /><Button label="Cancel" variant="ghost" disabled={busy} onPress={() => setConfirmingBlock(false)} /></View> : <Button label="Block user" variant="secondary" onPress={() => setConfirmingBlock(true)} />}
             </View>
           </ScrollView>
         </View>

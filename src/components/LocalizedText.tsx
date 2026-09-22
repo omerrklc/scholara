@@ -8,7 +8,7 @@ const translateChildren = (node: ReactNode, translate: (source: string) => strin
   return node;
 };
 
-export function Text({ children, ...props }: TextProps) {
+export function Text({ children, translate = true, ...props }: TextProps & { translate?: boolean }) {
   const { t } = useI18n();
-  return <NativeText {...props}>{translateChildren(children, t)}</NativeText>;
+  return <NativeText {...props}>{translate ? translateChildren(children, t) : children}</NativeText>;
 }

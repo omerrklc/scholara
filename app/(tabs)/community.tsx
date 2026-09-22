@@ -113,7 +113,7 @@ export default function CommunityScreen() {
           <Pressable accessibilityLabel={item.viewerOwns ? 'Delete your post' : `Safety options for ${item.authorName}`} accessibilityRole="button" onPress={() => item.viewerOwns ? setDeletePost(item) : setSafetyPost(item)} style={styles.more}><Ionicons name={item.viewerOwns ? 'trash-outline' : 'ellipsis-horizontal'} size={20} color={item.viewerOwns ? colors.danger : colors.inkMuted} /></Pressable>
         </View>
         <View style={styles.topic}><Chip label={categoryLabel[item.category]} /></View>
-        <Text style={styles.body}>{item.body}</Text>
+        <Text translate={false} style={styles.body}>{item.body}</Text>
         <View style={styles.stats}>
           <Pressable accessibilityLabel={`Open ${item.replyCount} replies`} accessibilityRole="button" onPress={() => setCommentsPost(item)} style={styles.statButton}><Ionicons name="chatbubble-outline" size={17} color={colors.inkMuted} /><Text style={styles.stat}>{item.replyCount} {t(item.replyCount === 1 ? 'reply' : 'replies')}</Text></Pressable>
           <Pressable accessibilityLabel={item.viewerHelpful ? 'Remove helpful vote' : 'Mark as helpful'} accessibilityRole="button" disabled={busyId === item.id} onPress={() => void markHelpful(item)} style={[styles.statButton, item.viewerHelpful && styles.helpful]}><Ionicons name={item.viewerHelpful ? 'arrow-up-circle' : 'arrow-up-circle-outline'} size={18} color={item.viewerHelpful ? colors.primary : colors.inkMuted} /><Text style={[styles.stat, item.viewerHelpful && styles.helpfulText]}>{item.helpfulCount} {t('helpful')}</Text></Pressable>

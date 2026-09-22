@@ -152,7 +152,7 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
         >
           <View style={styles.postSummary}>
             <View style={styles.summaryHeader}><View style={styles.summaryAvatar}><Text style={styles.summaryAvatarText}>{initials(post.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.summaryAuthor}>{post.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{post.authorStage}{post.authorUniversity ? ` · ${post.authorUniversity}` : ''} · {dateLabel(post.createdAt, locale)}</Text></View></View>
-            <Text style={styles.summaryBody}>{post.body}</Text>
+            <Text translate={false} style={styles.summaryBody}>{post.body}</Text>
             <View style={styles.discussionLabel}><Ionicons name="chatbubbles-outline" size={16} color={colors.primary} /><Text style={styles.discussionLabelText}>{comments.length} {t(comments.length === 1 ? 'comment' : 'comments')}</Text></View>
           </View>
           {error ? <MessageBanner message={error} /> : null}
@@ -162,7 +162,7 @@ export function CommunityCommentsModal({ post, onClose, onChanged, onBlocked }: 
             {depth > 0 ? <View style={styles.threadLine} /> : null}
             <View style={styles.commentMain}>
               <View style={styles.commentHeader}><View style={styles.commentAvatar}><Text style={styles.commentAvatarText}>{initials(comment.authorName)}</Text></View><View style={styles.commentIdentity}><Text style={styles.commentAuthor}>{comment.authorName}</Text><Text numberOfLines={1} style={styles.commentContext}>{comment.authorStage}{comment.authorUniversity ? ` · ${comment.authorUniversity}` : ''} · {dateLabel(comment.createdAt, locale)}</Text></View></View>
-              <Text style={styles.commentBody}>{comment.body}</Text>
+              <Text translate={false} style={styles.commentBody}>{comment.body}</Text>
               <View style={styles.commentActions}>
                 <Pressable accessibilityLabel={`Reply to ${comment.authorName}`} accessibilityRole="button" onPress={() => setReplyingTo(comment)} style={styles.commentAction}><Ionicons name="return-down-forward-outline" size={16} color={colors.inkMuted} /><Text style={styles.commentActionText}>Reply</Text></Pressable>
                 <Pressable accessibilityLabel={comment.viewerOwns ? 'Delete your comment' : `Safety options for ${comment.authorName}`} accessibilityRole="button" onPress={() => comment.viewerOwns ? setDeleteTarget(comment) : setSafetyTarget(comment)} style={styles.commentAction}><Ionicons name={comment.viewerOwns ? 'trash-outline' : 'ellipsis-horizontal'} size={16} color={comment.viewerOwns ? colors.danger : colors.inkMuted} /><Text style={[styles.commentActionText, comment.viewerOwns && styles.deleteText]}>{comment.viewerOwns ? 'Delete' : 'More'}</Text></Pressable>

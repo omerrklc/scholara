@@ -17,6 +17,7 @@ import {
 } from '@/services/moderationAdmin';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 const filters: { label: string; value: ModerationStatus }[] = [
   { label: 'Open', value: 'open' },
@@ -42,11 +43,12 @@ const sourceLabels: Record<string, string> = {
   discover: 'Discover', matches: 'Matches', chat: 'Chat', profile: 'Profile', community: 'Community',
 };
 
-const dateLabel = (value: string) => new Date(value).toLocaleString(undefined, {
+const dateLabel = (value: string, locale: string) => new Date(value).toLocaleString(locale, {
   year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
 });
 
 export default function ModerationScreen() {
+  const { locale, t } = useI18n();
   const { authReady, session } = useApp();
   const [role, setRole] = useState<ModerationRole | null>(null);
   const [status, setStatus] = useState<ModerationStatus>('open');
@@ -135,15 +137,15 @@ export default function ModerationScreen() {
     }
     setSelectedId('');
     setNotes('');
-    const durationLabel = banDurations.find((option) => option.value === banDuration)?.label ?? 'selected period';
-    setMessage(action === 'remove' ? 'The reported content was removed and the report was resolved.' : action === 'ban' ? `The account was banned for ${durationLabel.toLowerCase()} and the report was resolved.` : 'The account ban was lifted.');
+    const durationLabel = t(banDurations.find((option) => option.value === banDuration)?.label ?? 'selected period').toLocaleLowerCase(locale);
+    setMessage(action === 'remove' ? 'The reported content was removed and the report was resolved.' : action === 'ban' ? t('The account was banned for {{duration}} and the report was resolved.', { duration: durationLabel }) : 'The account ban was lifted.');
     const result = await fetchModerationReports(status);
     setReports(result.reports);
     setError(result.error ?? '');
   };
 
   const confirmEnforcement = (report: ModerationReport, action: 'remove' | 'ban' | 'unban') => {
-    const durationLabel = banDurations.find((option) => option.value === banDuration)?.label ?? 'the selected period';
+    const durationLabel = t(banDurations.find((option) => option.value === banDuration)?.label ?? 'the selected period').toLocaleLowerCase(locale);
     const copy = action === 'remove'
       ? { title: 'Remove reported content?', body: 'The post or reply will be permanently removed. The evidence snapshot and audit record will remain.', confirm: 'Remove content' }
       : action === 'ban'
@@ -175,9 +177,9 @@ export default function ModerationScreen() {
       <Text style={styles.emptyText}>This account cannot view or change private reports.</Text>
       <Button label="Go back" variant="secondary" onPress={() => router.back()} />
     </Card> : <>
-      <View style={styles.roleRow}><Ionicons name="shield-checkmark-outline" size={19} color={colors.primary} /><Text style={styles.roleText}>{role === 'admin' ? 'Administrator' : 'Moderator'} access</Text></View>
+      <View style={styles.roleRow}><Ionicons name="shield-checkmark-outline" size={19} color={colors.primary} /><Text style={styles.roleText}>{t('{{role}} access', { role: t(role === 'admin' ? 'Administrator' : 'Moderator') })}</Text></View>
       <View accessibilityRole="tablist" style={styles.filters}>{filters.map((filter) => <Chip key={filter.value} label={filter.label} selected={status === filter.value} onPress={() => { setSelectedId(''); setNotes(''); setBanDuration('1_week'); setStatus(filter.value); }} />)}</View>
-      {reports.length === 0 ? <Card style={styles.center}><Ionicons name="checkmark-circle-outline" size={44} color={colors.primary} /><Text style={styles.emptyTitle}>No {status} reports</Text><Text style={styles.emptyText}>Nothing needs attention in this queue.</Text></Card> : reports.map((report) => {
+      {reports.length === 0 ? <Card style={styles.center}><Ionicons name="checkmark-circle-outline" size={44} color={colors.primary} /><Text style={styles.emptyTitle}>{t('No {{status}} reports', { status: t(filters.find((item) => item.value === status)?.label ?? status).toLocaleLowerCase(locale) })}</Text><Text style={styles.emptyText}>Nothing needs attention in this queue.</Text></Card> : reports.map((report) => {
         const selected = selectedId === report.id;
         const decisionReady = notes.trim().length >= 5;
         return <Card key={report.id} style={styles.report}>
@@ -185,7 +187,7 @@ export default function ModerationScreen() {
             <View style={styles.reportTitleWrap}>
               <Text style={styles.reportName}>{report.reportedName}</Text>
               {report.reportedUsername ? <Text style={styles.username}>@{report.reportedUsername}</Text> : null}
-              <Text style={styles.meta}>{sourceLabels[report.source] ?? report.source} · {dateLabel(report.createdAt)}</Text>
+              <Text style={styles.meta}>{t(sourceLabels[report.source] ?? report.source)} · {dateLabel(report.createdAt, locale)}</Text>
             </View>
             <Ionicons name={selected ? 'chevron-up' : 'chevron-down'} size={21} color={colors.inkMuted} />
           </Pressable>

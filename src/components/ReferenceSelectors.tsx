@@ -4,16 +4,18 @@ import { Text } from '@/components/LocalizedText';
 import { Field, MessageBanner } from '@/components/ui';
 import { getCountryOptions, searchCities, searchInstitutions, type CityOption, type CountryOption, type InstitutionOption } from '@/services/referenceData';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 type CountryProps = { label: string; value: CountryOption | null; onSelect: (country: CountryOption) => void };
 
 export function CountrySelect({ label, value, onSelect }: CountryProps) {
+  const { language } = useI18n();
   const [query, setQuery] = useState(value?.name ?? '');
   const [open, setOpen] = useState(!value);
   const options = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return getCountryOptions('en').filter((country) => !needle || country.name.toLocaleLowerCase().includes(needle) || country.code.toLocaleLowerCase() === needle).slice(0, 8);
-  }, [query]);
+    return getCountryOptions(language).filter((country) => !needle || country.name.toLocaleLowerCase().includes(needle) || country.code.toLocaleLowerCase() === needle).slice(0, 8);
+  }, [language, query]);
 
   return <View style={styles.wrap}>
     <Field label={label} autoCorrect={false} value={query} placeholder="Search country" onFocus={() => setOpen(true)} onChangeText={(text) => { setQuery(text); setOpen(true); }} />
@@ -26,6 +28,7 @@ export function CountrySelect({ label, value, onSelect }: CountryProps) {
 export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
   value: InstitutionOption | null; countryCode?: string; onSelect: (institution: InstitutionOption) => void; onClear: () => void;
 }) {
+  const { language } = useI18n();
   const [query, setQuery] = useState(value?.name ?? '');
   const [results, setResults] = useState<InstitutionOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +41,7 @@ export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
     if (value?.name === trimmed || trimmed.length < 2) return;
     const timer = setTimeout(() => {
       setLoading(true); setError('');
-      void searchInstitutions(trimmed, countryCode).then((result) => {
+      void searchInstitutions(trimmed, countryCode, language).then((result) => {
         if (sequence !== request.current) return;
         setResults(result.results); setError(result.error ?? ''); setLoading(false);
       });
@@ -47,7 +50,7 @@ export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
       clearTimeout(timer);
       if (request.current === sequence) request.current += 1;
     };
-  }, [countryCode, query, value?.name]);
+  }, [countryCode, language, query, value?.name]);
 
   return <View style={styles.wrap}>
     <Field label="Institution or research organization" autoCorrect={false} maxLength={100} value={query} placeholder="Start typing the official name" onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) { setLoading(false); setResults([]); } if (value && text !== value.name) onClear(); }} />
@@ -64,6 +67,7 @@ export function InstitutionSelect({ value, countryCode, onSelect, onClear }: {
 export function CitySelect({ label, value, countryCode, onSelect, onClear }: {
   label: string; value: CityOption | null; countryCode: string; onSelect: (city: CityOption) => void; onClear: () => void;
 }) {
+  const { language } = useI18n();
   const [query, setQuery] = useState(value?.name ?? '');
   const [results, setResults] = useState<CityOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,7 +80,7 @@ export function CitySelect({ label, value, countryCode, onSelect, onClear }: {
     if (!countryCode || value?.name === trimmed || trimmed.length < 2) return;
     const timer = setTimeout(() => {
       setLoading(true); setError('');
-      void searchCities(trimmed, countryCode).then((result) => {
+      void searchCities(trimmed, countryCode, language).then((result) => {
         if (sequence !== request.current) return;
         setResults(result.results); setError(result.error ?? ''); setLoading(false);
       });
@@ -85,7 +89,7 @@ export function CitySelect({ label, value, countryCode, onSelect, onClear }: {
       clearTimeout(timer);
       if (request.current === sequence) request.current += 1;
     };
-  }, [countryCode, query, value?.name]);
+  }, [countryCode, language, query, value?.name]);
 
   return <View style={styles.wrap}>
     <Field label={label} editable={Boolean(countryCode)} autoCorrect={false} maxLength={100} value={query} placeholder={countryCode ? 'Search city' : 'Choose a country first'} onChangeText={(text) => { setQuery(text); setError(''); if (text.trim().length < 2) { setLoading(false); setResults([]); } if (value && text !== value.name) onClear(); }} />

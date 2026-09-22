@@ -7,6 +7,7 @@ import { Card, MessageBanner, Screen } from '@/components/ui';
 import { fetchNotifications, markAllNotificationsRead, markNotificationRead, type NotificationItem, type NotificationKind } from '@/services/notifications';
 import { useApp } from '@/state/AppProvider';
 import { colors, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 const labels: Record<NotificationKind, { title: string; icon: keyof typeof Ionicons.glyphMap }> = {
   connection_request: { title: 'wants to connect with you', icon: 'person-add-outline' },
@@ -17,10 +18,11 @@ const labels: Record<NotificationKind, { title: string; icon: keyof typeof Ionic
 };
 
 const initials = (name: string) => name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toLocaleUpperCase()).join('') || 'S';
-const timeLabel = (value: string) => new Date(value).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const timeLabel = (value: string, locale: string) => new Date(value).toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export default function NotificationsScreen() {
   const { authReady, refreshNotifications, session, unreadNotifications } = useApp();
+  const { locale, t } = useI18n();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -96,7 +98,7 @@ export default function NotificationsScreen() {
       onRefresh={() => void load()}
       refreshing={loading}
       showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <Pressable accessibilityLabel={`${item.actorName} ${labels[item.kind].title}`} accessibilityRole="button" onPress={() => void openNotification(item)}><Card style={[styles.item, !item.readAt && styles.unread]}><View style={styles.avatar}>{item.actorAvatarUrl ? <Image accessibilityLabel={`${item.actorName} profile photo`} source={{ uri: item.actorAvatarUrl }} style={styles.avatarImage} /> : <Text style={styles.initials}>{initials(item.actorName)}</Text>}</View><View style={styles.content}><Text style={styles.body}><Text style={styles.actor}>{item.actorName}</Text> {labels[item.kind].title}.</Text><Text style={styles.time}>{timeLabel(item.createdAt)}</Text></View><View style={styles.kindIcon}><Ionicons name={labels[item.kind].icon} size={19} color={colors.primary} /></View>{!item.readAt ? <View accessibilityLabel="Unread" style={styles.dot} /> : null}</Card></Pressable>}
+      renderItem={({ item }) => <Pressable accessibilityLabel={`${item.actorName} ${t(labels[item.kind].title)}`} accessibilityRole="button" onPress={() => void openNotification(item)}><Card style={[styles.item, !item.readAt && styles.unread]}><View style={styles.avatar}>{item.actorAvatarUrl ? <Image accessibilityLabel={`${item.actorName} ${t('profile photo')}`} source={{ uri: item.actorAvatarUrl }} style={styles.avatarImage} /> : <Text style={styles.initials}>{initials(item.actorName)}</Text>}</View><View style={styles.content}><Text style={styles.body}><Text style={styles.actor}>{item.actorName}</Text> {t(labels[item.kind].title)}.</Text><Text style={styles.time}>{timeLabel(item.createdAt, locale)}</Text></View><View style={styles.kindIcon}><Ionicons name={labels[item.kind].icon} size={19} color={colors.primary} /></View>{!item.readAt ? <View accessibilityLabel={t('Unread')} style={styles.dot} /> : null}</Card></Pressable>}
       ListEmptyComponent={!loading ? <Card style={styles.center}><Ionicons name="notifications-outline" size={46} color={colors.primary} /><Text style={styles.emptyTitle}>You are all caught up</Text><Text style={styles.emptyText}>New matches, messages and community activity will appear here.</Text></Card> : null}
       ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.primary} style={styles.footerLoader} /> : null}
     />

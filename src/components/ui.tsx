@@ -85,8 +85,11 @@ export function SectionTitle({ eyebrow, title, subtitle }: { eyebrow?: string; t
 }
 
 export function MessageBanner({ message, tone = 'error' }: { message: string; tone?: 'error' | 'success' | 'info' }) {
-  const { t } = useI18n();
-  return <View accessibilityRole="alert" style={[styles.banner, styles[`banner_${tone}`]]}><Text style={[styles.bannerText, styles[`bannerText_${tone}`]]}>{t(message)}</Text></View>;
+  const { language, t } = useI18n();
+  const translated = t(message);
+  const fallback = tone === 'success' ? 'Done.' : tone === 'info' ? 'Please review this information.' : 'Something went wrong. Please try again.';
+  const visibleMessage = language === 'en' || translated !== message ? translated : t(fallback);
+  return <View accessibilityRole="alert" style={[styles.banner, styles[`banner_${tone}`]]}><Text style={[styles.bannerText, styles[`bannerText_${tone}`]]}>{visibleMessage}</Text></View>;
 }
 
 const styles = StyleSheet.create({

@@ -10,6 +10,7 @@ import { getCountryOptions, type CityOption, type CountryOption, type Institutio
 import { useApp } from '@/state/AppProvider';
 import { colors, radius, spacing } from '@/theme/tokens';
 import type { AcademicStage, Profile } from '@/types/domain';
+import { useI18n } from '@/i18n';
 
 const stages: AcademicStage[] = ['Final-year undergraduate', "Master's student", 'PhD student', 'Postdoc'];
 const intents = ['Find researchers like me', 'Find collaborators', 'Discuss my research', 'Meet graduate students', 'Moving abroad', 'Find research opportunities'];
@@ -18,6 +19,7 @@ const proficiencyLevels = ['Native', 'Fluent', 'Advanced', 'Intermediate', 'Begi
 const countryName = (code: string) => getCountryOptions('en').find((country) => country.code === code)?.name ?? code;
 
 export default function OnboardingScreen() {
+  const { t } = useI18n();
   const { profile: storedProfile, completeOnboarding, session } = useApp();
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<Profile>(storedProfile);
@@ -26,7 +28,7 @@ export default function OnboardingScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
   const [institutionUnlisted, setInstitutionUnlisted] = useState(Boolean(storedProfile.university && !storedProfile.universityRorId));
-  const progress = `${step + 1} of 8`;
+  const progress = t('{{current}} of {{total}}', { current: step + 1, total: 8 });
   const update = <K extends keyof Profile>(key: K, value: Profile[K]) => setProfile((current) => ({ ...current, [key]: value }));
   const toggle = (key: 'intents' | 'researchInterests', value: string) => update(key, profile[key].includes(value) ? profile[key].filter((item) => item !== value) : [...profile[key], value]);
 

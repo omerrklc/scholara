@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { extraRows } from './translations-extra';
 
 export type AppLanguage = 'en' | 'fr' | 'es' | 'it' | 'de' | 'tr' | 'zh' | 'ja' | 'ru';
 
@@ -15,7 +16,7 @@ export const appLanguages: { code: AppLanguage; label: string; locale: string }[
   { code: 'ru', label: 'Русский', locale: 'ru-RU' },
 ];
 
-type PhraseRow = [string, string, string, string, string, string, string, string, string];
+export type PhraseRow = [string, string, string, string, string, string, string, string, string];
 
 const rows: PhraseRow[] = [
   ['Discover', 'Découvrir', 'Descubrir', 'Scopri', 'Entdecken', 'Keşfet', '发现', '見つける', 'Обзор'],
@@ -166,7 +167,13 @@ const rows: PhraseRow[] = [
 ];
 
 const languageOrder: AppLanguage[] = ['en', 'fr', 'es', 'it', 'de', 'tr', 'zh', 'ja', 'ru'];
-const dictionaries = Object.fromEntries(languageOrder.map((language, index) => [language, new Map(rows.map((row) => [row[0], row[index]]))])) as Record<AppLanguage, Map<string, string>>;
+const allRows = [...rows, ...extraRows];
+const dictionaries = Object.fromEntries(languageOrder.map((language, index) => [language, new Map(allRows.map((row) => [row[0], row[index]]))])) as Record<AppLanguage, Map<string, string>>;
+const templates = allRows.filter((row) => row[0].includes('{{')).map((row) => ({
+  row,
+  keys: [...row[0].matchAll(/{{(\w+)}}/g)].map((match) => match[1]),
+  regex: new RegExp(`^${row[0].split(/{{\w+}}/).map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+?)')}$`),
+}));
 const storageKey = 'scholara.app-language';
 
 const isLanguage = (value: string | null): value is AppLanguage => Boolean(value && languageOrder.includes(value as AppLanguage));
@@ -201,9 +208,17 @@ export function I18nProvider({ children }: PropsWithChildren) {
   }, []);
 
   const t = useCallback((source: string, values?: Record<string, string | number>) => {
-    let translated = dictionaries[language].get(source) ?? source;
-    Object.entries(values ?? {}).forEach(([key, value]) => { translated = translated.replaceAll(`{{${key}}}`, String(value)); });
-    return translated;
+    const leading = source.match(/^\s*/)?.[0] ?? '';
+    const trailing = source.match(/\s*$/)?.[0] ?? '';
+    const clean = source.trim();
+    const template = values ? undefined : templates.find(({ regex }) => regex.test(clean));
+    const templateMatch = template?.regex.exec(clean);
+    const inferredValues = template && templateMatch
+      ? Object.fromEntries(template.keys.map((key, index) => [key, templateMatch[index + 1]]))
+      : undefined;
+    let translated = dictionaries[language].get(clean) ?? (template ? template.row[languageOrder.indexOf(language)] : clean);
+    Object.entries(values ?? inferredValues ?? {}).forEach(([key, value]) => { translated = translated.replaceAll(`{{${key}}}`, String(value)); });
+    return `${leading}${translated}${trailing}`;
   }, [language]);
 
   const locale = appLanguages.find((item) => item.code === language)?.locale ?? 'en-US';
@@ -216,3 +231,5 @@ export function useI18n() {
   if (!context) throw new Error('useI18n must be used inside I18nProvider');
   return context;
 }
+
+export const translationRows = allRows;

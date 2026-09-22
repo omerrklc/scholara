@@ -8,11 +8,13 @@ import { SafetySheet } from '@/components/SafetySheet';
 import { fetchConversation, fetchConversationSummaries, markConversationRead, sendChatMessage, subscribeToConversation, type ChatMessage } from '@/services/messaging';
 import { useApp } from '@/state/AppProvider';
 import { colors, radius, spacing } from '@/theme/tokens';
+import { useI18n } from '@/i18n';
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const timeLabel = (value: string) => new Date(value).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+const timeLabel = (value: string, locale: string) => new Date(value).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
 export default function ChatScreen() {
+  const { locale } = useI18n();
   const params = useLocalSearchParams<{ userId?: string | string[] }>();
   const otherUserId = Array.isArray(params.userId) ? params.userId[0] : params.userId ?? '';
   const { authReady, session } = useApp();
@@ -89,7 +91,7 @@ export default function ChatScreen() {
       onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
       renderItem={({ item }) => {
         const mine = item.senderId === session?.user.id;
-        return <View style={[styles.bubbleWrap, mine ? styles.mineWrap : styles.theirsWrap]}><View style={[styles.bubble, mine ? styles.mine : styles.theirs]}><Text style={[styles.body, mine && styles.mineBody]}>{item.body}</Text><Text style={[styles.time, mine && styles.mineTime]}>{timeLabel(item.createdAt)}</Text></View></View>;
+        return <View style={[styles.bubbleWrap, mine ? styles.mineWrap : styles.theirsWrap]}><View style={[styles.bubble, mine ? styles.mine : styles.theirs]}><Text translate={false} style={[styles.body, mine && styles.mineBody]}>{item.body}</Text><Text style={[styles.time, mine && styles.mineTime]}>{timeLabel(item.createdAt, locale)}</Text></View></View>;
       }}
       ListEmptyComponent={<View style={styles.empty}><Ionicons name="chatbubble-ellipses-outline" size={42} color={colors.primary} /><Text style={styles.emptyTitle}>Start the conversation</Text><Text style={styles.emptyText}>Introduce yourself and mention what sparked the match.</Text></View>}
     />}

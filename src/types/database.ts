@@ -233,6 +233,7 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          parent_comment_id: string | null
           post_id: string
         }
         Insert: {
@@ -240,6 +241,7 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          parent_comment_id?: string | null
           post_id: string
         }
         Update: {
@@ -247,6 +249,7 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          parent_comment_id?: string | null
           post_id?: string
         }
         Relationships: [
@@ -262,6 +265,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -793,7 +803,9 @@ export type Database = {
       }
       block_user: { Args: { target_user_id: string }; Returns: boolean }
       create_community_comment: {
-        Args: { comment_body: string; target_post_id: string }
+        Args:
+          | { comment_body: string; target_post_id: string }
+          | { comment_body: string; target_parent_comment_id: string | null; target_post_id: string }
         Returns: string
       }
       create_community_post: {
@@ -923,6 +935,7 @@ export type Database = {
           body: string
           comment_id: string
           created_at: string
+          parent_comment_id: string | null
           viewer_owns: boolean
         }[]
       }

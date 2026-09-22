@@ -20,6 +20,7 @@ export type CommunityPost = {
 
 export type CommunityComment = {
   id: string;
+  parentCommentId: string | null;
   authorId: string;
   authorName: string;
   authorStage: string;
@@ -36,7 +37,7 @@ type PostRow = {
 };
 
 type CommentRow = {
-  comment_id: string; author_id: string; author_name: string; author_stage: string; author_university: string;
+  comment_id: string; parent_comment_id: string | null; author_id: string; author_name: string; author_stage: string; author_university: string;
   body: string; created_at: string; viewer_owns: boolean;
 };
 
@@ -87,17 +88,21 @@ export async function fetchCommunityComments(postId: string) {
   const { data, error } = await supabase.rpc('get_community_comments', { target_post_id: postId, page_size: 100 });
   if (error) return { comments: [] as CommunityComment[], error: 'Comments could not be loaded.' };
   const comments = ((data ?? []) as CommentRow[]).map((row) => ({
-    id: row.comment_id, authorId: row.author_id, authorName: row.author_name, authorStage: row.author_stage,
+    id: row.comment_id, parentCommentId: row.parent_comment_id, authorId: row.author_id, authorName: row.author_name, authorStage: row.author_stage,
     authorUniversity: row.author_university, body: row.body, createdAt: row.created_at, viewerOwns: row.viewer_owns,
   })).reverse();
   return { comments, error: null };
 }
 
-export async function createCommunityComment(postId: string, body: string) {
+export async function createCommunityComment(postId: string, body: string, parentCommentId: string | null = null) {
   if (!supabase) return { id: null, error: 'Community is not configured.' };
   const cleanBody = normalizeCommunityComment(body);
   if (!cleanBody) return { id: null, error: 'Write a comment first.' };
-  const { data, error } = await supabase.rpc('create_community_comment', { target_post_id: postId, comment_body: cleanBody });
+  const { data, error } = await supabase.rpc('create_community_comment', {
+    target_post_id: postId,
+    comment_body: cleanBody,
+    target_parent_comment_id: parentCommentId,
+  });
   if (!error) return { id: data, error: null };
   if (error.message.toLowerCase().includes('rate limit')) return { id: null, error: 'You are commenting too quickly. Please wait a moment.' };
   if (error.message.toLowerCase().includes('restricted')) return { id: null, error: 'This account is restricted from posting.' };

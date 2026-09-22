@@ -40,11 +40,11 @@ export function Chip({ label, selected = false, onPress }: { label: string; sele
   return onPress ? <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>{content}</Pressable> : <View style={[styles.chip, selected && styles.chipSelected]}>{content}</View>;
 }
 
-export function Field({ label, multiline = false, accessory, ...props }: TextInputProps & { label: string; accessory?: ReactNode }) {
+export function Field({ label, multiline = false, accessory, style, ...props }: TextInputProps & { label: string; accessory?: ReactNode }) {
   return <View style={styles.fieldWrap}>
     <Text maxFontSizeMultiplier={1.3} style={styles.label}>{label}</Text>
     <View style={styles.inputWrap}>
-      <TextInput accessibilityLabel={label} maxFontSizeMultiplier={1.3} placeholderTextColor="#8C9691" multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined]} {...props} />
+      <TextInput accessibilityLabel={label} maxFontSizeMultiplier={1.3} placeholderTextColor="#8C9691" multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={[styles.input, multiline && styles.textarea, accessory ? styles.inputWithAccessory : undefined, style]} {...props} />
       {accessory ? <View style={styles.inputAccessory}>{accessory}</View> : null}
     </View>
   </View>;
